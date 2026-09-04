@@ -1,0 +1,139 @@
+{
+  "name": "songkou",
+  "title": "永泰嵩口古镇 20 集 AI 文化宣传短剧",
+  "style_qualifier": "嵩口古镇文化宣传",
+  "engine": {
+    "provider": "runninghub",
+    "app_id": "2090774740146413570",
+    "instance_type": "plus",
+    "defaults": {
+      "duration": 15,
+      "aspect_ratio": "16:9 (Widescreen)",
+      "megapixels": "0.7000000000000001",
+      "use_personal_queue": "false",
+      "aspect_ratio_fielddata": "[\"COMBO\", {\"default\": \"1:1 (Square)\", \"options\": [\"1:1 (Square)\", \"2:3 (Portrait Photo)\", \"3:2 (Photo)\", \"3:4 (Portrait Standard)\", \"4:3 (Standard)\", \"9:16 (Portrait Widescreen)\", \"16:9 (Widescreen)\", \"21:9 (Ultrawide)\"], \"tooltip\": \"The aspect ratio for the output dimensions.\", \"multiselect\": false}]"
+    }
+  },
+  "style": {
+    "visual": "目标视频采用电影感、文学化文化宣传风格，柔和暖光，嵩口薄雾永恒氛围，白墙黛瓦徽派建筑，大樟溪晨雾，轻度去饱和SLOG质感。",
+    "retention": "电影质感文化宣传风格，柔和暖光，薄雾萦绕的古朴氛围，轻度去饱和SLOG色调"
+  },
+  "prompt_templates": {
+    "single": "prompt_template_single.txt",
+    "dual": "prompt_template_dual.txt"
+  },
+  "characters": {
+    "linxiaoxi": {
+      "name": "林小溪",
+      "gender": "女性",
+      "ref_image": "images/songkou_characters/lin_xiaoxi_three_view.png",
+      "voice": "audio/voices/songkou_girl_main.flac",
+      "identity": "林小溪，24岁返乡青年，黑长低马尾，空气刘海，浅蓝交领汉服上衣配白边，蓝色牛仔阔腿裤，白色帆布鞋，温柔微笑",
+      "retention": "林小溪的面部、长发、服装全程一致",
+      "voice_desc": "温柔活泼的年轻女声"
+    },
+    "chenagong": {
+      "name": "陈阿公",
+      "gender": "男性",
+      "ref_image": "images/songkou_characters/chen_agong_three_view.png",
+      "voice": "audio/voices/songkou_elder.flac",
+      "identity": "陈阿公，72岁嵩口智慧长者，银白头发，饱经风霜的慈祥面容，深蓝棉布唐装，黑布鞋，微驼背，手持木杖",
+      "retention": "陈阿公的面部、银发、唐装、木杖全程一致",
+      "voice_desc": "苍老温和的男声"
+    },
+    "mysterious_traveler": {
+      "name": "神秘旅人",
+      "gender": "男性",
+      "ref_image": "images/songkou_characters/mysterious_traveler_three_view.png",
+      "voice": "audio/voices/songkou_traveler.flac",
+      "identity": "神秘旅人，28岁哲学思考者，米白棉麻衬衫配深灰针织开衫，背画板速写本，清冷气质",
+      "retention": "神秘旅人的面部、发型、开衫、画板全程一致",
+      "voice_desc": "清冷沉稳的青年男声"
+    },
+    "xiaonuomi": {
+      "name": "小糯米",
+      "gender": "女性",
+      "ref_image": "images/songkou_characters/xiao_nuomi_three_view.png",
+      "voice": null,
+      "identity": "小糯米，8岁天真孩童，圆脸大眼睛，双马尾，浅粉小旗袍/背带裙，手持糖葫芦",
+      "retention": "小糯米的圆脸、双马尾、粉色着装全程一致",
+      "voice_desc": "稚气活泼的幼年女声（音色待选定）"
+    },
+    "zhangdaoyan": {
+      "name": "张导演",
+      "gender": "男性",
+      "ref_image": "images/songkou_characters/zhang_director_three_view.png",
+      "voice": "audio/voices/张导演_voice.flac",
+      "identity": "张导演，35岁纪录片导演，短发戴眼镜，卡其摄影背心，手持摄像机，外来视角略带喜剧色彩",
+      "retention": "张导演的发型、眼镜、摄影背心、摄像机全程一致",
+      "voice_desc": "略带喜剧感的青年男声"
+    },
+    "wangshen": {
+      "name": "王婶",
+      "gender": "女性",
+      "ref_image": "images/songkou_characters/王婶_three_view.png",
+      "voice": "audio/voices/王婶_voice.flac",
+      "identity": "王婶，55岁热心村民，务实温暖，朴实的中年妇女着装",
+      "retention": "王婶的面部、着装、道具（菜篮/灯笼）全程一致",
+      "voice_desc": "热络爽朗的中年女声"
+    }
+  },
+  "scenes": {
+    "songkou_panorama": {
+      "name": "嵩口全景",
+      "ref_image": "images/嵩口真实场景图/嵩口全景.png",
+      "desc": "大樟溪穿镇而过，白墙黑瓦明清古民居群依山傍水，航拍俯瞰全貌",
+      "anchor": "建筑群纵深、溪流走向与晨雾氛围",
+      "retention": "嵩口全景的建筑群轮廓、溪流走向保持稳定"
+    },
+    "longkou_zucu": {
+      "name": "龙口祖厝",
+      "ref_image": "images/嵩口真实场景图/龙口祖厝.png",
+      "desc": "龙口祖厝，嵩口镇区核心，四座大厝组成庞大建筑群，青砖灰瓦，门楣龙雕",
+      "anchor": "建筑纵深与门楣形态",
+      "retention": "龙口祖厝门楣、青砖灰瓦、建筑纵深保持稳定"
+    },
+    "wan_an_bu": {
+      "name": "万安堡",
+      "ref_image": "images/嵩口真实场景图/万安堡.png",
+      "desc": "万安堡，嵩口标志性夯土防御古堡（描述待补充：参见主文档场景资产表）",
+      "anchor": "堡墙体量与门洞形态",
+      "retention": "万安堡的夯土墙体、门洞形态保持稳定"
+    },
+    "hexing_road": {
+      "name": "鹤形路",
+      "ref_image": "images/嵩口真实场景图/鹤形路.png",
+      "desc": "鹤形路，嵩口风水步道（描述待补充）",
+      "anchor": "步道走向与两侧建筑",
+      "retention": "鹤形路的步道走向保持稳定"
+    },
+    "yong_tan_cu": {
+      "name": "用坦厝",
+      "ref_image": "images/嵩口真实场景图/用坦厝.jpeg",
+      "desc": "用坦厝，嵩口大型古民居（描述待补充）",
+      "anchor": "厝体格局与门面",
+      "retention": "用坦厝的建筑格局保持稳定"
+    },
+    "gu_matou": {
+      "name": "古码头",
+      "ref_image": "images/嵩口真实场景图/古码头.png",
+      "desc": "大樟溪古码头（描述待补充）",
+      "anchor": "码头石阶与溪岸线",
+      "retention": "古码头的石阶与溪岸保持稳定"
+    },
+    "ning_yuan_zhuang": {
+      "name": "宁远庄",
+      "ref_image": "images/嵩口真实场景图/宁远庄.png",
+      "desc": "宁远庄（描述待补充）",
+      "anchor": "庄体建筑形态",
+      "retention": "宁远庄的建筑形态保持稳定"
+    },
+    "de_xing_lou": {
+      "name": "德星楼",
+      "ref_image": "images/嵩口真实场景图/德星楼.jpeg",
+      "desc": "德星楼（描述待补充）",
+      "anchor": "楼体形态与临水关系",
+      "retention": "德星楼的楼体形态保持稳定"
+    }
+  }
+}

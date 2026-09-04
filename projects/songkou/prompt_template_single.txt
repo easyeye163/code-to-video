@@ -1,0 +1,22 @@
+subject_definitions:
+<Picture 1> 严格负责{p1_gender}角色的身份与造型：{p1_identity}。全片不得漂移。
+<Picture 2> 仅负责场景空间环境与机位参照：{scene_desc}。以图2为准确定{scene_anchor}，不参与人物造型。
+<Audio 1> 为 <Subject 1>（S1）的音色参考：{voice_desc}。
+
+summary:
+{duration}秒{style_qualifier}质感镜头。{summary}
+
+retention_analysis:
+<Picture 1>（角色锚点）：完全保留 - {p1_name}的身份、发型、服装保持一致。
+<Subject 1>（全程出镜）：完全保留 - 身份与服装保持一致。
+<Audio 1>：参考 - 目标说话人遵循参考音色，不复制信号。
+
+detailed_description:
+{style_visual}
+{shots}
+
+overall_soundscape:
+{soundscape}。
+
+non_diegetic_music:
+{music}。

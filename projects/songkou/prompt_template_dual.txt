@@ -1,0 +1,23 @@
+subject_definitions:
+<Picture 1> 严格负责{p1_gender}角色的身份与造型：{p1_identity}。面部、发型、服装颜色与版型、体态比例均以图1为准，全片不得漂移。
+<Picture 2> 严格负责{p2_gender}角色的身份与造型：{p2_identity}。面部、发型、服装颜色与版型、体态比例均以图2为准，全片不得漂移。
+<Picture 3> 仅负责场景空间环境与机位参照：{scene_desc}。以图3为准确定{scene_anchor}，不参与人物造型。
+<Audio 1> 为 <Subject {voice_subject}>（S{voice_subject}）的音色参考：{voice_desc}。
+
+summary:
+{duration}秒{style_qualifier}质感镜头。{summary}
+
+retention_analysis:
+人物不变量：图1{p1_retention}；{p2_retention}，不出现换装、变形、多余手指或五官扭曲。
+场景不变量：{scene_retention}。
+风格不变量：{style_retention}。
+绝对禁止：字幕、画面文字、LOGO、水印。
+
+detailed_description:
+{shots}
+
+overall_soundscape:
+{soundscape}。
+
+non_diegetic_music:
+{music}。

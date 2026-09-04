@@ -1,0 +1,96 @@
+{
+  "project": "songkou",
+  "episode": 7,
+  "title": "时空对话",
+  "segments": [
+    {
+      "seg": 1,
+      "p1": "linxiaoxi",
+      "scene": "songkou_panorama",
+      "voice": "linxiaoxi",
+      "duration": 15,
+      "summary": "清晨薄雾笼罩下的嵩口古镇全貌（场景参照<Picture 2>嵩口全景），航拍俯瞰到地面跟拍，S1在场，暖光初现，乡愁与期待交织。",
+      "shots": [
+        {
+          "time": "0s-7s",
+          "desc": "中景跟拍，<Picture 1> 参照的 <Subject 1>（S1）林小溪拖着行李箱走在青石板巷道上，薄雾飘过白墙黛瓦屋顶，她四下张望，轻声感叹",
+          "dialogue": "嵩口……我回来了。"
+        },
+        {
+          "time": "7s-15s",
+          "desc": "中近景，她停下脚步仰望古镇屋檐，薄雾捕捉到第一缕暖光，眼眶微红，嘴角带着释然微笑。"
+        }
+      ],
+      "soundscape": "远处鸟鸣与柔和的河雾环境声",
+      "music": "古筝独奏，温柔而苏醒"
+    },
+    {
+      "seg": 2,
+      "p1": "linxiaoxi",
+      "p2": "chenagong",
+      "scene": "longkou_zucu",
+      "voice": "chenagong",
+      "duration": 15,
+      "summary": "陈阿公追忆曾祖父放弃科举留嵩口办学堂的抉择，深沉厚重。",
+      "shots": [
+        {
+          "time": "0s-7s",
+          "desc": "中景，陈阿公（S2）神情庄重，",
+          "dialogue": "你曾祖父放弃科举，留嵩口办学堂。族里很多人不理解，说他断了升官发财的路。"
+        },
+        {
+          "time": "7s-15s",
+          "desc": "缓推至陈阿公饱经风霜的面庞。"
+        }
+      ],
+      "soundscape": "风声",
+      "music": "低沉延绵的弦乐"
+    },
+    {
+      "seg": 3,
+      "p1": "linxiaoxi",
+      "p2": "chenagong",
+      "scene": "longkou_zucu",
+      "voice": "linxiaoxi",
+      "duration": 15,
+      "summary": "曾祖父办学堂结出十七秀才三举人的硕果，林小溪点睛少有人走的路，希望升腾。",
+      "shots": [
+        {
+          "time": "0s-7s",
+          "desc": "中景，陈阿公（S2）继续道，",
+          "dialogue": "后来这村子出了十七个秀才，三个举人。"
+        },
+        {
+          "time": "7s-15s",
+          "desc": "近景，林小溪（S1）低语，",
+          "dialogue": "他走成少有人走的路，却走成大多数人的路。"
+        }
+      ],
+      "soundscape": "远处钟声",
+      "music": "希望升腾的旋律"
+    },
+    {
+      "seg": 4,
+      "p1": "linxiaoxi",
+      "p2": "chenagong",
+      "scene": "longkou_zucu",
+      "scene_retention": "龙口祖厝门楣、夕阳金光、建筑纵深保持稳定",
+      "voice": "chenagong",
+      "duration": 15,
+      "summary": "陈阿公道出祖厝供奉的是选择的勇气，夕阳镀金门扉缓缓打开，庄重收束。",
+      "shots": [
+        {
+          "time": "0s-7s",
+          "desc": "中景，陈阿公（S2）点头，",
+          "dialogue": "祖厝里供的不只是祖先牌位，还有他们当初做选择的勇气。"
+        },
+        {
+          "time": "7s-15s",
+          "desc": "全景，夕阳镀金祖厝门扉仿佛缓缓打开。"
+        }
+      ],
+      "soundscape": "风过檐声",
+      "music": "温暖收束的主题"
+    }
+  ]
+}

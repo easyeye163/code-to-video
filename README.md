@@ -101,6 +101,43 @@ python scripts/minio_sync.py check
 
 ---
 
+## 🚀 制作流水线：项目抽象 + 自动生成 payload
+
+> 用「项目配置 + 分镜数据 + 提示词模板」自动组装 RunningHub payload，取代手工编写 `scripts/ep*_seg*_payload.json`。
+
+### 项目抽象（projects/<项目名>/）
+
+| 文件 | 作用 |
+|---|---|
+| `project.json` | 项目配置：引擎参数（AppID/画幅/时长）、角色库（形象/三视图/音色/不变量）、场景库（参照图/锚点/不变量）、风格 |
+| `prompt_template_single.txt` | 6段式模板·单角色+场景（Picture 2=场景） |
+| `prompt_template_dual.txt` | 6段式模板·双角色+场景（Picture 2=第二角色，Picture 3=场景） |
+| `storyboards/epN.json` | 分集分镜：角色/场景/音色/时长/镜头/台词/声景/配乐 |
+| `output/` | 生成的 payload（已 gitignore） |
+
+嵩口为第一个项目实例：6 角色 / 8 场景 / ep7 全集 4 段分镜。
+
+### 使用
+
+```bash
+python pipeline.py check   projects/songkou            # 校验配置/分镜/资产可解析
+python pipeline.py payload projects/songkou --ep 7     # 生成整集 payload（不消耗币）
+python pipeline.py submit  projects/songkou --ep 7 --seg 2 --wait   # 提交并等待成片
+```
+
+- 资产（角色图/场景图/音色）在配置中只写仓库相对路径，由资源清单自动解析为 **MinIO URL**
+- 分镜级覆盖：如 `"scene_retention"` 可按段定制不变量（ep7 seg4 的"夕阳金光"即用此实现）
+- **验证结果**：ep7 seg2-4 自动生成的提示词与手工版**逐字一致**；seg1 仅 Shot 分行的规范化差异
+
+### 新建一个短剧项目
+
+1. 复制 `projects/songkou/` 为 `projects/<新项目>/`
+2. 修改 `project.json`：角色库（形象/音色/不变量）、场景库、风格与模板措辞
+3. 编写 `storyboards/ep1.json` 分镜
+4. `python pipeline.py check projects/<新项目>` 通过后即可生成/提交
+
+---
+
 ## 短剧必备工作流（自用）
 
 1、 Z-image text-to-image-文生图（完美支持中文字+超自然）【Agent必备】
@@ -173,6 +210,8 @@ python scripts/minio_sync.py check
 | 路径 | 功能 | 约束 / 说明 |
 |---|---|---|
 | `1、【实施中】嵩口宣传项目.md` | **项目主文档（入口）** | 单一权威源，进度/资产状态/瑕疵/版本记录以此为准 |
+| `pipeline.py` | **制作流水线入口** | 分镜+项目配置+提示词模板 → payload 自动生成/提交 |
+| `projects/` | **项目抽象层** | 各短剧项目的配置/角色库/场景库/分镜（嵩口为首个实例） |
 | `scripts/` | Python / Shell 脚本 | 自动化任务；`minio_sync.py` 负责资源上传与链接管理 |
 | `resources/` | **资源总索引** | `minio-manifest.json`：全部媒体资源的对象键与 MinIO 链接 |
 | `data/` | JSON 数据 | 结构化制作数据（剧本/分镜/批量创建载荷） |
@@ -204,6 +243,7 @@ python scripts/minio_sync.py check
    - 三视图：`xxx_three_view.png`（如 `lin_xiaoxi_three_view.png`）
    - 音色：`songkou_xxx.flac`
 7. **资源清单更新（重要）**：每次新增/删除 audio/images/videos 文件后，必须执行 `scan + sync` 并提交 `resources/minio-manifest.json`，否则协作者查不到资源链接
+8. **新分镜制作**：优先在 `projects/<项目>/storyboards/` 编写分镜，用 `pipeline.py payload/submit` 生成与提交；`scripts/ep*_payload.json` 为历史手工版本，仅作对照参考
 
 ## 标准制作链路（单集 4 步）
 
