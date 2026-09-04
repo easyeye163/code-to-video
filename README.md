@@ -293,9 +293,14 @@ python3 scripts/seedance_video.py status --task-id cgt-xxxxx
 
 ## 看板与展示说明
 
-仓库内保留了三个看板 HTML（`songkou-dashboard.html`、`songkou-dashboard-dynamic.html`、`yaolu-dashboard.html`）与 `index.html`。
+**MinIO 版动态看板（推荐）**：[songkou-dashboard-minio.html](./songkou-dashboard-minio.html)
+- 双击本地打开即可浏览全部 MinIO 资源（图片/视频/音频），支持类型筛选与搜索
+- 数据源双保险：主 MinIO 桶内清单 `resources/minio-manifest.json`（`sync` 后自动更新到桶），备为页面内置快照
+- 素材卡片上的链接即 MinIO URL，可直接复制用于 RunningHub / Seedance API 传参
 
-> ⚠️ 其中内嵌的素材链接仍指向原仓库 h3-video-coding 的 jsDelivr CDN / GitHub Pages 地址，属于历史快照（原仓库为公开仓库，链接仍可访问）。如需将看板接入 MinIO 资源体系，把其中的 CDN 链接替换为 `resources/minio-manifest.json` 中的 MinIO URL 即可。
+仓库内另保留了三个历史看板 HTML（`songkou-dashboard.html`、`songkou-dashboard-dynamic.html`、`yaolu-dashboard.html`）与 `index.html`。
+
+> ⚠️ 历史看板内嵌的素材链接仍指向原仓库 h3-video-coding 的 jsDelivr CDN / GitHub Pages 地址，属于历史快照（原仓库为公开仓库，链接仍可访问）。
 
 ## 当前进度（2026-08-29 快照，来自原仓库）
 

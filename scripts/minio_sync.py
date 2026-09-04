@@ -281,6 +281,11 @@ def cmd_sync(root: Path, cfg: dict, rescan: bool):
     })
     save_manifest(manifest)
     print(f"\n同步完成：新上传 {uploaded} 个，已存在跳过 {skipped} 个")
+
+    # 清单本身也同步进桶（固定短键，供看板等外部程序读取最新索引）
+    manifest_key = "resources/minio-manifest.json"
+    client.fput_object(cfg["bucket"], manifest_key, str(MANIFEST_PATH))
+    print(f"资源清单已同步到桶内：{cfg['bucket']}/{manifest_key}")
     if not cfg["public_base_url"]:
         print("提示：未配置 public_base_url，清单中 url 为空；"
               "请在配置中填写 MinIO 公网访问基址后重新 sync")
