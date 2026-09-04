@@ -1,0 +1,10 @@
+{
+  "endpoint": "minio.example.com:9000",
+  "access_key": "请替换为你的ACCESS_KEY",
+  "secret_key": "请替换为你的SECRET_KEY",
+  "bucket": "code-to-video",
+  "secure": true,
+  "public_base_url": "https://minio.example.com:9000",
+  "prefix": "code-to-video",
+  "set_public_policy": true
+}
