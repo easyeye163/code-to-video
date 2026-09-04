@@ -123,10 +123,12 @@ python scripts/minio_sync.py check
 python pipeline.py check   projects/songkou            # 校验配置/分镜/资产可解析
 python pipeline.py payload projects/songkou --ep 7     # 生成整集 payload（不消耗币）
 python pipeline.py submit  projects/songkou --ep 7 --seg 2 --wait   # 提交并等待成片
+python pipeline.py batch   projects/songkou --ep 7 [--continue-on-error]  # 串行批量生成
 ```
 
 - 资产（角色图/场景图/音色）在配置中只写仓库相对路径，由资源清单自动解析为 **MinIO URL**
 - 分镜级覆盖：如 `"scene_retention"` 可按段定制不变量（ep7 seg4 的"夕阳金光"即用此实现）
+- **并发处理（重要）**：RunningHub 并发上限 1，`batch` 串行执行——提交撞 421 自动等待重试（默认 30s×20 次），一段完成**自动提交下一段**；每段成片自动下载到 `output/`（或 `--save-dir` 指定目录），COS 链接 24h 失效的问题一并解决；状态文件 `output/ep<N>_batch_state.json` 支持中断续跑（已成功且成片在手的段自动跳过）
 - **验证结果**：ep7 seg2-4 自动生成的提示词与手工版**逐字一致**；seg1 仅 Shot 分行的规范化差异
 
 ### 新建一个短剧项目

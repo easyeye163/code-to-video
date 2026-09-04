@@ -18,6 +18,7 @@ code-to-video 制作流水线
   python pipeline.py payload projects/songkou --ep 7           # 生成整集 payload
   python pipeline.py payload projects/songkou --ep 7 --seg 1 --stdout
   python pipeline.py submit  projects/songkou --ep 7 --seg 1 [--wait]   # 提交（消耗币）
+  python pipeline.py batch   projects/songkou --ep 7 [--continue-on-error]  # 串行批量（自动排队+下载）
 
 资产解析：角色图/场景图/音色在配置中只写仓库相对路径，由 resources/minio-manifest.json
 自动解析为 MinIO URL。清单缺失时先运行：
@@ -288,9 +289,37 @@ def cmd_payload(project_dir: Path, ep: int, seg=None, stdout=False):
         print(f"\n提交示例：python pipeline.py submit {project_dir} --ep {ep} --seg {segs[0]['seg']}")
 
 
-def cmd_submit(project_dir: Path, ep: int, seg: int, wait=False):
+def runninghub_api(url, body, key, timeout=90):
     import urllib.request
 
+    req = urllib.request.Request(url, data=json.dumps(body).encode("utf-8"), method="POST",
+                                 headers={"Content-Type": "application/json",
+                                          "Authorization": f"Bearer {key}",
+                                          "User-Agent": "code-to-video-pipeline"})
+    return json.loads(urllib.request.urlopen(req, timeout=timeout).read())
+
+
+def is_concurrency_error(resp):
+    """RunningHub 并发超限：errorCode 421，或错误信息含 并发/concurrency"""
+    code = str(resp.get("errorCode", ""))
+    msg = str(resp.get("errorMessage", "")).lower()
+    return code == "421" or "并发" in msg or "concurren" in msg
+
+
+def download_file(url, path: Path):
+    import urllib.request
+
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with urllib.request.urlopen(url, timeout=300) as r, open(path, "wb") as f:
+        while True:
+            chunk = r.read(1 << 16)
+            if not chunk:
+                break
+            f.write(chunk)
+    return path
+
+
+def cmd_submit(project_dir: Path, ep: int, seg: int, wait=False):
     key = os.environ.get("RUNNINGHUB_API_KEY")
     if not key:
         die("未设置环境变量 RUNNINGHUB_API_KEY")
@@ -306,15 +335,7 @@ def cmd_submit(project_dir: Path, ep: int, seg: int, wait=False):
         die(f"ep{ep} seg{seg}: {e}")
 
     app_id = project.cfg["engine"]["app_id"]
-
-    def api(url, body):
-        req = urllib.request.Request(url, data=json.dumps(body).encode("utf-8"), method="POST",
-                                     headers={"Content-Type": "application/json",
-                                              "Authorization": f"Bearer {key}",
-                                              "User-Agent": "code-to-video-pipeline"})
-        return json.loads(urllib.request.urlopen(req, timeout=90).read())
-
-    resp = api(f"{RUNNINGHUB_BASE}/run/ai-app/{app_id}", payload)
+    resp = runninghub_api(f"{RUNNINGHUB_BASE}/run/ai-app/{app_id}", payload, key)
     task_id = resp.get("taskId")
     if not task_id:
         die(f"提交失败：{json.dumps(resp, ensure_ascii=False)[:300]}")
@@ -324,7 +345,7 @@ def cmd_submit(project_dir: Path, ep: int, seg: int, wait=False):
     if wait:
         for i in range(1, 31):
             time.sleep(10)
-            q = api(f"{RUNNINGHUB_BASE}/query", {"taskId": task_id})
+            q = runninghub_api(f"{RUNNINGHUB_BASE}/query", {"taskId": task_id}, key)
             st = (q.get("taskStatus") or q.get("status") or "?").upper()
             print(f"  [{i * 10}s] {st}")
             if st == "SUCCESS":
@@ -334,6 +355,142 @@ def cmd_submit(project_dir: Path, ep: int, seg: int, wait=False):
                 return
             if st == "FAILED":
                 die(f"任务失败：{json.dumps(q, ensure_ascii=False)[:300]}")
+
+
+def cmd_batch(project_dir: Path, ep: int, seg=None, continue_on_error=False,
+              task_timeout=900, retry_wait=30, max_retries=20, save_dir=None):
+    """串行批量生成：自动处理并发占用（421）等待，一段完成后自动提交下一段。
+
+    状态文件 projects/<项目>/output/ep<N>_batch_state.json 记录每段进度，
+    中断后重跑会自动跳过已成功且成片已下载的段。
+    """
+    key = os.environ.get("RUNNINGHUB_API_KEY")
+    if not key:
+        die("未设置环境变量 RUNNINGHUB_API_KEY")
+
+    project = Project(project_dir)
+    sb = project.storyboard(ep)
+    segs = [s for s in sb["segments"] if seg is None or s["seg"] == seg]
+    if not segs:
+        die(f"未找到分镜：ep{ep}" + (f" seg{seg}" if seg else ""))
+
+    out_dir = project_dir / "output"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    state_path = out_dir / f"ep{ep}_batch_state.json"
+    state = load_json(state_path) if state_path.exists() else {}
+    save_dir = Path(save_dir) if save_dir else out_dir
+
+    def save_state():
+        state_path.write_text(json.dumps(state, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    def finished(s):
+        st = state.get(str(s["seg"]), {})
+        return (st.get("status") == "SUCCESS" and st.get("files")
+                and all(Path(f).exists() for f in st["files"]))
+
+    todo = [s for s in segs if not finished(s)]
+    print(f"批次 ep{ep}：共 {len(segs)} 段，待处理 {len(todo)}，已完成跳过 {len(segs) - len(todo)}")
+    print(f"串行策略：并发占用每 {retry_wait}s 重试（最多 {max_retries} 次），轮询 10s/次，单任务超时 {task_timeout}s")
+
+    app_id = project.cfg["engine"]["app_id"]
+    ok = fail = 0
+
+    for idx, s in enumerate(todo, 1):
+        tag = f"ep{ep} seg{s['seg']}"
+        try:
+            payload = build_payload(project, s, ep)
+        except ValueError as e:
+            fail += 1
+            state[str(s["seg"])] = {"status": "BUILD_FAILED", "error": str(e)}
+            save_state()
+            print(f"✗ [{tag}] payload 生成失败：{e}")
+            if not continue_on_error:
+                die(f"{tag} 中止（--continue-on-error 可跳过继续）")
+            continue
+
+        # ---- 提交（处理并发占用 421）----
+        task_id = None
+        for attempt in range(1, max_retries + 1):
+            resp = runninghub_api(f"{RUNNINGHUB_BASE}/run/ai-app/{app_id}", payload, key)
+            task_id = resp.get("taskId")
+            if task_id:
+                break
+            err = f"{resp.get('errorCode', '')} {resp.get('errorMessage', '')}".strip()
+            if not is_concurrency_error(resp):
+                state[str(s["seg"])] = {"status": "SUBMIT_FAILED", "error": err}
+                save_state()
+                print(f"✗ [{tag}] 提交失败：{err}")
+                task_id = None
+                break
+            print(f"  [{tag}] 并发占用（{err}），{retry_wait}s 后重试 {attempt}/{max_retries}")
+            time.sleep(retry_wait)
+        if not task_id:
+            fail += 1
+            if not continue_on_error:
+                die(f"{tag} 提交未成功，批次中止（--continue-on-error 可跳过继续）")
+            continue
+        print(f"  [{tag}]（{idx}/{len(todo)}）已提交 taskId={task_id}")
+
+        # ---- 轮询 ----
+        final = None
+        start = time.time()
+        while time.time() - start < task_timeout:
+            time.sleep(10)
+            q = runninghub_api(f"{RUNNINGHUB_BASE}/query", {"taskId": task_id}, key)
+            stt = (q.get("taskStatus") or q.get("status") or "?").upper()
+            print(f"    [{int(time.time() - start)}s] {stt}")
+            if stt in ("SUCCESS", "FAILED"):
+                final = q
+                break
+
+        if final is None:
+            fail += 1
+            state[str(s["seg"])] = {"status": "TIMEOUT", "taskId": task_id}
+            save_state()
+            print(f"✗ [{tag}] 轮询超时（>{task_timeout}s），taskId={task_id} 可到控制台查看")
+            if not continue_on_error:
+                die(f"{tag} 超时中止（--continue-on-error 可跳过继续）")
+            time.sleep(10)
+            continue
+
+        # ---- 成功：下载成片（COS 链接 24h 失效，必须及时落地）----
+        if (final.get("taskStatus") or final.get("status")).upper() == "SUCCESS":
+            results = final.get("results") or []
+            files = []
+            for i, r in enumerate(results, 1):
+                url = r.get("url")
+                if not url:
+                    continue
+                ext = (r.get("outputType") or "bin").lstrip(".")
+                suffix = f"_{i}" if len(results) > 1 else ""
+                path = save_dir / f"ep{ep}_seg{s['seg']}{suffix}.{ext}"
+                try:
+                    download_file(url, path)
+                    files.append(str(path))
+                    print(f"    ✓ 已下载 {path.name}（{path.stat().st_size // 1024} KB）")
+                except Exception as e:  # noqa: BLE001
+                    print(f"    ⚠ 下载失败：{e}（COS 链接 24h 内有效，请手动保存 {url}）")
+            state[str(s["seg"])] = {"status": "SUCCESS", "taskId": task_id, "files": files,
+                                    "urls": [r.get("url") for r in results]}
+            save_state()
+            ok += 1
+            time.sleep(10)  # 提交间隔，缓解 API 压力
+            continue
+
+        # ---- 失败 ----
+        fail += 1
+        err = f"{final.get('errorCode', '')} {final.get('errorMessage', '')}".strip()
+        state[str(s["seg"])] = {"status": "FAILED", "taskId": task_id, "error": err}
+        save_state()
+        print(f"✗ [{tag}] 任务失败：{err}")
+        if not continue_on_error:
+            die(f"{tag} 失败中止（--continue-on-error 可跳过继续）")
+
+    print(f"\n批次结束：成功 {ok}，失败 {fail}；状态：{state_path}")
+    if save_dir.resolve() != out_dir.resolve():
+        print(f"成片目录 {save_dir}：建议运行 scripts/minio_sync.py scan+sync 将成片纳入资源清单")
+    if fail:
+        raise SystemExit(1)
 
 
 def main():
@@ -356,6 +513,15 @@ def main():
     p.add_argument("--seg", type=int, required=True, help="段号")
     p.add_argument("--wait", action="store_true", help="轮询直到任务完成")
 
+    p = sub.add_parser("batch", help="串行批量生成：自动处理并发占用等待，一段完成自动提交下一段")
+    p.add_argument("project", help="项目目录")
+    p.add_argument("--ep", type=int, required=True, help="集数")
+    p.add_argument("--seg", type=int, help="只跑指定段（缺省整集）")
+    p.add_argument("--continue-on-error", action="store_true", help="失败/超时后继续下一段")
+    p.add_argument("--task-timeout", type=int, default=900, help="单任务轮询超时秒数，默认 900")
+    p.add_argument("--retry-wait", type=int, default=30, help="并发占用重试间隔秒数，默认 30")
+    p.add_argument("--save-dir", help="成片下载目录（缺省 projects/<项目>/output/）")
+
     args = ap.parse_args()
     project_dir = Path(args.project)
     if not project_dir.exists():
@@ -367,6 +533,9 @@ def main():
         cmd_payload(project_dir, args.ep, args.seg, args.stdout)
     elif args.cmd == "submit":
         cmd_submit(project_dir, args.ep, args.seg, args.wait)
+    elif args.cmd == "batch":
+        cmd_batch(project_dir, args.ep, args.seg, args.continue_on_error,
+                  args.task_timeout, args.retry_wait, args.save_dir)
 
 
 if __name__ == "__main__":
