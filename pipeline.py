@@ -131,7 +131,9 @@ def render_prompt(project: Project, seg: dict):
         "p1_retention": p1["retention"],
         "scene_desc": scene["desc"],
         "scene_anchor": scene["anchor"],
+        "scene_extra": scene.get("extra", ""),
         "scene_retention": seg.get("scene_retention", scene["retention"]),
+        "p1_role": p1.get("role", f"{p1['gender']}角色"),
         "voice_desc": voice["voice_desc"],
         "duration": seg.get("duration", defaults["duration"]),
         "style_qualifier": project.cfg["style_qualifier"],
@@ -149,6 +151,7 @@ def render_prompt(project: Project, seg: dict):
         ctx["p2_gender"] = p2["gender"]
         ctx["p2_identity"] = p2["identity"]
         ctx["p2_retention"] = p2["retention"]
+        ctx["p2_role"] = p2.get("role", f"{p2['gender']}角色")
         ctx["voice_subject"] = "1" if voice_key == seg["p1"] else "2"
         mode = "dual"
     else:
@@ -168,12 +171,21 @@ def build_payload(project: Project, seg: dict, ep: int):
     scene_url = project.assets.url_of(scene["ref_image"])
     voice_url = project.assets.url_of(voice["voice"])
 
-    if p2 is not None:  # 双角色模式：P2=第二角色，P3=场景
-        node166 = {"nodeId": "166", "fieldName": "image",
-                   "fieldValue": project.assets.url_of(p2["ref_image"]),
-                   "description": f"picture2（{p2['name']}角色图）"}
-        node167 = {"nodeId": "167", "fieldName": "image", "fieldValue": scene_url,
-                   "description": f"picture3（{scene['name']}场景图）"}
+    if p2 is not None:  # 双角色模式：节点分配由 engine.dual_layout 决定
+        if project.cfg["engine"].get("dual_layout") == "scene_at_166":
+            # 镇妖录式：Picture 2=场景（node 166），Picture 3=第二角色（node 167）
+            node166 = {"nodeId": "166", "fieldName": "image", "fieldValue": scene_url,
+                       "description": f"picture2（{scene['name']}场景图）"}
+            node167 = {"nodeId": "167", "fieldName": "image",
+                       "fieldValue": project.assets.url_of(p2["ref_image"]),
+                       "description": f"picture3（{p2['name']}角色图）"}
+        else:
+            # 嵩口式（默认）：Picture 2=第二角色（node 166），Picture 3=场景（node 167）
+            node166 = {"nodeId": "166", "fieldName": "image",
+                       "fieldValue": project.assets.url_of(p2["ref_image"]),
+                       "description": f"picture2（{p2['name']}角色图）"}
+            node167 = {"nodeId": "167", "fieldName": "image", "fieldValue": scene_url,
+                       "description": f"picture3（{scene['name']}场景图）"}
     else:  # 单角色模式：P2=场景，P3=占位
         node166 = {"nodeId": "166", "fieldName": "image", "fieldValue": scene_url,
                    "description": f"picture2（{scene['name']}场景图）"}
