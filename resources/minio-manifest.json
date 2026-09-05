@@ -1,11 +1,11 @@
 {
-  "updated": "2026-09-06T06:46:34+08:00",
+  "updated": "2026-09-06T07:40:02+08:00",
   "endpoint": "zhangshuxia.ltd:9000",
   "bucket": "code-to-video",
   "prefix": "code-to-video",
   "public_base_url": "http://zhangshuxia.ltd:9000",
-  "total": 192,
-  "total_size": 726204908,
+  "total": 193,
+  "total_size": 751193680,
   "resources": [
     {
       "path": "audio/01_温暖治愈男生.flac",
@@ -1542,6 +1542,14 @@
       "size": 23293941,
       "object_key": "code-to-video/videos/yaolu_s1/ep02_final.mp4",
       "url": "http://zhangshuxia.ltd:9000/code-to-video/code-to-video/videos/yaolu_s1/ep02_final.mp4"
+    },
+    {
+      "path": "videos/yaolu_s1/ep03_final.mp4",
+      "type": "video",
+      "name": "ep03_final.mp4",
+      "size": 24988772,
+      "object_key": "code-to-video/videos/yaolu_s1/ep03_final.mp4",
+      "url": "http://zhangshuxia.ltd:9000/code-to-video/code-to-video/videos/yaolu_s1/ep03_final.mp4"
     }
   ]
 }
