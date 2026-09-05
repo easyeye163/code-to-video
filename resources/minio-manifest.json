@@ -1,11 +1,11 @@
 {
-  "updated": "2026-09-05T10:38:26+08:00",
+  "updated": "2026-09-05T11:56:51+08:00",
   "endpoint": "zhangshuxia.ltd:9000",
   "bucket": "code-to-video",
   "prefix": "code-to-video",
   "public_base_url": "http://zhangshuxia.ltd:9000",
-  "total": 182,
-  "total_size": 614840590,
+  "total": 187,
+  "total_size": 648934449,
   "resources": [
     {
       "path": "audio/01_温暖治愈男生.flac",
@@ -254,6 +254,38 @@
       "size": 2104225,
       "object_key": "code-to-video/images/crystal_palace.png",
       "url": "http://zhangshuxia.ltd:9000/code-to-video/code-to-video/images/crystal_palace.png"
+    },
+    {
+      "path": "images/generated/congbing/scene_bing.png",
+      "type": "image",
+      "name": "scene_bing.png",
+      "size": 2421275,
+      "object_key": "code-to-video/images/generated/congbing/scene_bing.png",
+      "url": "http://zhangshuxia.ltd:9000/code-to-video/code-to-video/images/generated/congbing/scene_bing.png"
+    },
+    {
+      "path": "images/generated/congbing/scene_shop_front.png",
+      "type": "image",
+      "name": "scene_shop_front.png",
+      "size": 2467502,
+      "object_key": "code-to-video/images/generated/congbing/scene_shop_front.png",
+      "url": "http://zhangshuxia.ltd:9000/code-to-video/code-to-video/images/generated/congbing/scene_shop_front.png"
+    },
+    {
+      "path": "images/generated/congbing/scene_stove.png",
+      "type": "image",
+      "name": "scene_stove.png",
+      "size": 2120957,
+      "object_key": "code-to-video/images/generated/congbing/scene_stove.png",
+      "url": "http://zhangshuxia.ltd:9000/code-to-video/code-to-video/images/generated/congbing/scene_stove.png"
+    },
+    {
+      "path": "images/generated/congbing/shifu.png",
+      "type": "image",
+      "name": "shifu.png",
+      "size": 1674779,
+      "object_key": "code-to-video/images/generated/congbing/shifu.png",
+      "url": "http://zhangshuxia.ltd:9000/code-to-video/code-to-video/images/generated/congbing/shifu.png"
     },
     {
       "path": "images/modern_city_night.png",
@@ -934,6 +966,14 @@
       "size": 4884983,
       "object_key": "code-to-video/videos/demo_10s_xianxia_hexingroad.mp4",
       "url": "http://zhangshuxia.ltd:9000/code-to-video/code-to-video/videos/demo_10s_xianxia_hexingroad.mp4"
+    },
+    {
+      "path": "videos/promo/congbing_ep1_final.mp4",
+      "type": "video",
+      "name": "congbing_ep1_final.mp4",
+      "size": 25409346,
+      "object_key": "code-to-video/videos/promo/congbing_ep1_final.mp4",
+      "url": "http://zhangshuxia.ltd:9000/code-to-video/code-to-video/videos/promo/congbing_ep1_final.mp4"
     },
     {
       "path": "videos/songkou-vlog/万安堡.mp4",

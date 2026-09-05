@@ -164,11 +164,18 @@ def save_manifest(m: dict):
 
 
 def cmd_scan(root: Path, cfg: dict):
-    """扫描资源根目录中的媒体文件，生成/刷新 resources/minio-manifest.json。"""
+    """扫描资源根目录中的媒体文件，生成/刷新 resources/minio-manifest.json。
+
+    assets（pipeline.py asset）登记的 images/generated/ 条目不在扫描范围内，会原样保留。
+    """
     old = {}
     prev = load_manifest()
+    generated_kept = []
     if prev:
         for e in prev.get("resources", []):
+            if e["path"].startswith("images/generated/"):
+                generated_kept.append(e)  # asset 产物不在本地资源根目录，保留
+                continue
             old[(e["path"], e.get("size"))] = e.get("url")
 
     entries = []
@@ -190,6 +197,7 @@ def cmd_scan(root: Path, cfg: dict):
                 "object_key": object_key(cfg, rel),
                 "url": url,
             })
+    entries = generated_kept + entries
     entries.sort(key=lambda e: e["path"])
 
     manifest = {
