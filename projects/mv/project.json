@@ -1,0 +1,118 @@
+{
+  "name": "mv",
+  "title": "嵩口古镇文旅音乐短片（MV）",
+  "style_qualifier": "嵩口古镇文旅音乐短片画面",
+  "engine": {
+    "provider": "runninghub",
+    "app_id": "2090774740146413570",
+    "instance_type": "plus",
+    "defaults": {
+      "duration": 15,
+      "aspect_ratio": "16:9 (Widescreen)",
+      "megapixels": "0.7000000000000001",
+      "use_personal_queue": "false",
+      "aspect_ratio_fielddata": "[\"COMBO\", {\"default\": \"1:1 (Square)\", \"options\": [\"1:1 (Square)\", \"2:3 (Portrait Photo)\", \"3:2 (Photo)\", \"3:4 (Portrait Standard)\", \"4:3 (Standard)\", \"9:16 (Portrait Widescreen)\", \"16:9 (Widescreen)\", \"21:9 (Ultrawide)\"], \"tooltip\": \"The aspect ratio for the output dimensions.\", \"multiselect\": false}]"
+    }
+  },
+  "style": {
+    "visual": "目标视频采用电影感音乐短片质感，柔和自然光，嵩口四季与晨昏光影变化，白墙黛瓦徽派建筑，大樟溪水乡氛围，轻度去饱和胶片质感。",
+    "retention": "电影感音乐短片质感，柔和自然光，晨昏光影氛围，轻度去饱和胶片色调"
+  },
+  "prompt_templates": {
+    "single": "prompt_template_single.txt",
+    "dual": "prompt_template_dual.txt"
+  },
+  "characters": {
+    "linxiaoxi": {
+      "name": "林小溪",
+      "gender": "女性",
+      "role": "女性角色",
+      "ref_image": "images/songkou_characters/lin_xiaoxi_three_view.png",
+      "voice": "audio/voices/songkou_girl_main.flac",
+      "identity": "林小溪，24岁返乡青年，黑长低马尾，空气刘海，浅蓝交领汉服上衣配白边，蓝色牛仔阔腿裤，白色帆布鞋，温柔微笑",
+      "retention": "林小溪的面部、长发、服装全程一致",
+      "voice_desc": "温柔活泼的年轻女声"
+    },
+    "chenagong": {
+      "name": "陈阿公",
+      "gender": "男性",
+      "role": "男性长者角色",
+      "ref_image": "images/songkou_characters/chen_agong_three_view.png",
+      "voice": "audio/voices/songkou_elder.flac",
+      "identity": "陈阿公，72岁嵩口智慧长者，银白头发，饱经风霜的慈祥面容，深蓝棉布唐装，黑布鞋，微驼背，手持木杖",
+      "retention": "陈阿公的面部、银发、唐装、木杖全程一致",
+      "voice_desc": "苍老温和的男声"
+    },
+    "mysterious_traveler": {
+      "name": "神秘旅人",
+      "gender": "男性",
+      "role": "男性角色",
+      "ref_image": "images/songkou_characters/mysterious_traveler_three_view.png",
+      "voice": "audio/voices/songkou_traveler.flac",
+      "identity": "神秘旅人，28岁哲学思考者，米白棉麻衬衫配深灰针织开衫，背画板速写本，清冷气质",
+      "retention": "神秘旅人的面部、发型、开衫、画板全程一致",
+      "voice_desc": "清冷沉稳的青年男声"
+    },
+    "wangshen": {
+      "name": "王婶",
+      "gender": "女性",
+      "role": "女性角色",
+      "ref_image": "images/songkou_characters/王婶_three_view.png",
+      "voice": "audio/voices/王婶_voice.flac",
+      "identity": "王婶，55岁热心村民，务实温暖，朴实的中年妇女着装",
+      "retention": "王婶的面部、着装、道具（菜篮/灯笼）全程一致",
+      "voice_desc": "热络爽朗的中年女声"
+    }
+  },
+  "scenes": {
+    "songkou_panorama": {
+      "name": "嵩口全景",
+      "ref_image": "images/嵩口真实场景图/嵩口全景.png",
+      "desc": "大樟溪穿镇而过，白墙黑瓦明清古民居群依山傍水，航拍俯瞰全貌",
+      "extra": "",
+      "anchor": "建筑群纵深、溪流走向与晨雾氛围",
+      "retention": "嵩口全景的建筑群轮廓、溪流走向保持稳定"
+    },
+    "hexing_road": {
+      "name": "鹤形路",
+      "ref_image": "images/嵩口真实场景图/鹤形路.png",
+      "desc": "鹤形路，嵩口风水步道，鹅卵石巷道蜿蜒",
+      "extra": "",
+      "anchor": "步道走向与两侧建筑",
+      "retention": "鹤形路的步道走向保持稳定"
+    },
+    "gu_matou": {
+      "name": "古码头",
+      "ref_image": "images/嵩口真实场景图/古码头.png",
+      "desc": "大樟溪古码头，石阶延伸至水面，千年渡口",
+      "extra": "",
+      "anchor": "码头石阶与溪岸线",
+      "retention": "古码头的石阶与溪岸保持稳定"
+    },
+    "wan_an_bu": {
+      "name": "万安堡",
+      "ref_image": "images/嵩口真实场景图/万安堡.png",
+      "desc": "万安堡，嵩口标志性夯土防御古堡",
+      "extra": "",
+      "anchor": "堡墙体量与门洞形态",
+      "retention": "万安堡的夯土墙体、门洞形态保持稳定"
+    },
+    "de_xing_lou": {
+      "name": "德星楼",
+      "ref_image": "images/嵩口真实场景图/德星楼.jpeg",
+      "desc": "德星楼，临水楼阁",
+      "extra": "",
+      "anchor": "楼体形态与临水关系",
+      "retention": "德星楼的楼体形态保持稳定"
+    },
+    "ning_yuan_zhuang": {
+      "name": "宁远庄",
+      "ref_image": "images/嵩口真实场景图/宁远庄.png",
+      "desc": "宁远庄，嵩口古庄寨",
+      "extra": "",
+      "anchor": "庄体建筑形态",
+      "retention": "宁远庄的建筑形态保持稳定"
+    }
+  },
+  "_notes": "MV 项目为规划中骨架：创意候选《归嵩口》《嵩口十二时辰》《鹤鸣嵩口》见 docs 与原规划文档；音乐生成走 RunningHub AI 音乐工作流（docs/runninghub_ai音乐与语音识别工作流.md）；分镜待音乐确定后编写 storyboards/。资产全部复用写实版（images/songkou_characters、嵩口真实场景图、audio/voices）。"
+}

@@ -1,0 +1,22 @@
+subject_definitions:
+<Picture 1> 严格负责{p1_role}的身份与造型：{p1_identity}。全片不得漂移。
+<Picture 3> 严格负责{p2_role}的身份与造型：{p2_identity}。全片不得漂移。
+<Picture 2> 仅负责场景空间环境与机位参照：{scene_desc}。{scene_extra}以图2为准确定{scene_anchor}，不参与人物造型。
+
+summary:
+{duration}秒{style_qualifier}。{summary}
+
+retention_analysis:
+人物不变量：图1{p1_retention}；图3{p2_retention}。
+场景不变量：{scene_retention}。
+风格不变量：{style_retention}。
+绝对禁止：字幕、画面文字、LOGO、水印。
+
+detailed_description:
+{shots}
+
+overall_soundscape:
+{soundscape}。
+
+non_diegetic_music:
+{music}。
