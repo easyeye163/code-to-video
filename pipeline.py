@@ -258,8 +258,9 @@ def cmd_check(project_dir: Path):
                 project.assets.url_of(c["voice"])
             except ValueError as e:
                 problems.append(f"[角色 {c['name']}] voice: {e}")
-        else:
-            problems.append(f"[角色 {c['name']}] voice: 未配置（无专属音色文件，引用该角色的分镜无法生成）")
+        elif not c.get("voice_optional"):
+            problems.append(f"[角色 {c['name']}] voice: 未配置（无专属音色文件，引用该角色的分镜无法生成；"
+                            f"无对白角色可在 project.json 中设 \"voice_optional\": true 豁免）")
         for f in ("identity", "retention", "voice_desc", "gender"):
             if not c.get(f):
                 problems.append(f"[角色 {c['name']}] {f}: 缺失")

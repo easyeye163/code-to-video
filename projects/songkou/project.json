@@ -54,10 +54,10 @@
       "name": "小糯米",
       "gender": "女性",
       "ref_image": "images/songkou_characters/xiao_nuomi_three_view.png",
-      "voice": null,
+      "voice": "audio/voices/songkou_xiaonuomi.flac",
       "identity": "小糯米，8岁天真孩童，圆脸大眼睛，双马尾，浅粉小旗袍/背带裙，手持糖葫芦",
       "retention": "小糯米的圆脸、双马尾、粉色着装全程一致",
-      "voice_desc": "稚气活泼的幼年女声（音色待选定）"
+      "voice_desc": "天真烂漫的稚气童声，清脆活泼，尾音上扬"
     },
     "zhangdaoyan": {
       "name": "张导演",

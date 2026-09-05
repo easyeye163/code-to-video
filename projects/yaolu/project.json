@@ -63,17 +63,18 @@
       "voice": null,
       "identity": "穷奇，上古凶兽，体型如小山般巨大，四足粗壮巨爪如柱，浑身黑红色鳞片硬甲，背部骨刺，头部似牛似虎，红色巨眼獠牙，周身缠绕黑紫色妖气",
       "retention": "穷奇的巨兽体态、鳞片硬甲、红色巨眼全程一致",
-      "voice_desc": "（妖兽无对白，仅咆哮声效）"
+      "voice_desc": "（妖兽无对白，仅咆哮声效）",
+      "voice_optional": true
     },
     "xiaonuomi": {
       "name": "小糯米",
       "gender": "女性",
       "role": "女性孩童角色",
       "ref_image": "images/songkou_3d_characters/xiao_nuomi_3d_turnaround.png",
-      "voice": null,
+      "voice": "audio/voices/songkou_xiaonuomi.flac",
       "identity": "小糯米，8岁，双马尾，粉色小旗袍，手持糖葫芦，天生灵瞳，天真可爱",
       "retention": "小糯米的圆脸、双马尾、粉色着装全程一致",
-      "voice_desc": "稚气活泼的幼年女声（音色待选定）"
+      "voice_desc": "天真烂漫的稚气童声，清脆活泼，尾音上扬"
     },
     "zhangdaoyan": {
       "name": "张导演",
