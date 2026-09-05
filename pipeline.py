@@ -1198,7 +1198,7 @@ def cmd_verify(project_dir: Path, ep: int, seg: int, threshold=60.0):
     cfg = json.load(open(ROOT / "scripts" / "minio_config.json", encoding="utf-8"))
     from minio import Minio
     c = _minio_client_for_upload(cfg)
-    obj = f"{cfg['prefix']}/tmp/verify/ep{ep}_seg{seg}_audio.mp3"
+    obj = f"{cfg['prefix']}/tmp/verify/ep{ep}_seg{seg}_{int(time.time())}_audio.mp3"
     c.fput_object(cfg["bucket"], obj, str(audio), content_type="audio/mpeg")
     audio_url = f"{cfg['public_base_url']}/{cfg['bucket']}/{quote(obj, safe='/')}"
 
@@ -1235,6 +1235,7 @@ def cmd_verify(project_dir: Path, ep: int, seg: int, threshold=60.0):
     heard = _norm_cn(srt_text)
     print(f"\n台词保真报告  ep{ep} seg{seg}（ASR 消耗 {coins} 币）")
     print(f"  剧本台词 {len(expected)} 句 | ASR 回读 {len(heard)} 字")
+    print(f"  ASR 原文：{srt_text[:120]}")
     ok = 0
     for dlg in expected:
         d = _norm_cn(dlg)
