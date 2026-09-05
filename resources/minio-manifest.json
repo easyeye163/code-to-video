@@ -1,11 +1,11 @@
 {
-  "updated": "2026-09-05T19:46:47+08:00",
+  "updated": "2026-09-05T20:40:22+08:00",
   "endpoint": "zhangshuxia.ltd:9000",
   "bucket": "code-to-video",
   "prefix": "code-to-video",
   "public_base_url": "http://zhangshuxia.ltd:9000",
-  "total": 188,
-  "total_size": 674887217,
+  "total": 189,
+  "total_size": 676859731,
   "resources": [
     {
       "path": "audio/01_温暖治愈男生.flac",
@@ -286,6 +286,14 @@
       "size": 1674779,
       "object_key": "code-to-video/images/generated/congbing/shifu.png",
       "url": "http://zhangshuxia.ltd:9000/code-to-video/code-to-video/images/generated/congbing/shifu.png"
+    },
+    {
+      "path": "images/generated/yaolu/scene_bing_stall.png",
+      "type": "image",
+      "name": "scene_bing_stall.png",
+      "size": 1972514,
+      "object_key": "code-to-video/images/generated/yaolu/scene_bing_stall.png",
+      "url": "http://zhangshuxia.ltd:9000/code-to-video/code-to-video/images/generated/yaolu/scene_bing_stall.png"
     },
     {
       "path": "images/modern_city_night.png",
@@ -979,7 +987,7 @@
       "path": "videos/promo/yaolu_congbing_ep1_final.mp4",
       "type": "video",
       "name": "yaolu_congbing_ep1_final.mp4",
-      "size": 25034733,
+      "size": 25427174,
       "object_key": "code-to-video/videos/promo/yaolu_congbing_ep1_final.mp4",
       "url": "http://zhangshuxia.ltd:9000/code-to-video/code-to-video/videos/promo/yaolu_congbing_ep1_final.mp4"
     },
