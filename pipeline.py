@@ -872,6 +872,8 @@ _INIT_STORYBOARD_README = """# 分镜目录
 }
 ```
 
+> **台词量经验**：15 秒段建议台词 ≥2 句（约 30~40 字）铺满时段，台词过少模型会为填满音轨而重复念白。
+
 分段级覆盖字段（覆盖 project.json 默认）：`p1_identity` `p2_identity` `p1_retention` `p2_retention`
 `scene_desc` `scene_anchor` `scene_extra` `scene_retention` `style_retention` `drift_clause` `voice_audio`
 """
