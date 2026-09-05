@@ -60,11 +60,10 @@
       "gender": "凶兽",
       "role": "妖兽",
       "ref_image": "images/songkou_3d_characters/qiongqi_four_legs_3d_turnaround.png",
-      "voice": null,
+      "voice": "audio/voices/songkou_qiongqi.flac",
       "identity": "穷奇，上古凶兽，体型如小山般巨大，四足粗壮巨爪如柱，浑身黑红色鳞片硬甲，背部骨刺，头部似牛似虎，红色巨眼獠牙，周身缠绕黑紫色妖气",
       "retention": "穷奇的巨兽体态、鳞片硬甲、红色巨眼全程一致",
-      "voice_desc": "（妖兽无对白，仅咆哮声效）",
-      "voice_optional": true
+      "voice_desc": "低沉浑厚的凶兽嗓音，嘶吼沙哑，字句间夹杂低频咆哮震颤，古老威压"
     },
     "xiaonuomi": {
       "name": "小糯米",

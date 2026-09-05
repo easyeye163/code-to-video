@@ -1,11 +1,11 @@
 {
-  "updated": "2026-09-05T09:44:11+08:00",
+  "updated": "2026-09-05T09:52:05+08:00",
   "endpoint": "zhangshuxia.ltd:9000",
   "bucket": "code-to-video",
   "prefix": "code-to-video",
   "public_base_url": "http://zhangshuxia.ltd:9000",
-  "total": 181,
-  "total_size": 614393589,
+  "total": 182,
+  "total_size": 614840590,
   "resources": [
     {
       "path": "audio/01_温暖治愈男生.flac",
@@ -126,6 +126,14 @@
       "size": 325368,
       "object_key": "code-to-video/audio/voices/songkou_girl_main.wav",
       "url": "http://zhangshuxia.ltd:9000/code-to-video/code-to-video/audio/voices/songkou_girl_main.wav"
+    },
+    {
+      "path": "audio/voices/songkou_qiongqi.flac",
+      "type": "audio",
+      "name": "songkou_qiongqi.flac",
+      "size": 447001,
+      "object_key": "code-to-video/audio/voices/songkou_qiongqi.flac",
+      "url": "http://zhangshuxia.ltd:9000/code-to-video/code-to-video/audio/voices/songkou_qiongqi.flac"
     },
     {
       "path": "audio/voices/songkou_traveler.flac",
