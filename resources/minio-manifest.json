@@ -1,11 +1,11 @@
 {
-  "updated": "2026-09-05T22:14:46+08:00",
+  "updated": "2026-09-06T06:46:34+08:00",
   "endpoint": "zhangshuxia.ltd:9000",
   "bucket": "code-to-video",
   "prefix": "code-to-video",
   "public_base_url": "http://zhangshuxia.ltd:9000",
-  "total": 191,
-  "total_size": 702910967,
+  "total": 192,
+  "total_size": 726204908,
   "resources": [
     {
       "path": "audio/01_温暖治愈男生.flac",
@@ -158,6 +158,14 @@
       "size": 173256,
       "object_key": "code-to-video/audio/voices/songkou_xiaonuomi.flac",
       "url": "http://zhangshuxia.ltd:9000/code-to-video/code-to-video/audio/voices/songkou_xiaonuomi.flac"
+    },
+    {
+      "path": "audio/voices/songkou_xiaonuomi_v2.flac",
+      "type": "audio",
+      "name": "songkou_xiaonuomi_v2.flac",
+      "size": 231621,
+      "object_key": "code-to-video/audio/voices/songkou_xiaonuomi_v2.flac",
+      "url": "http://zhangshuxia.ltd:9000/code-to-video/code-to-video/audio/voices/songkou_xiaonuomi_v2.flac"
     },
     {
       "path": "audio/voices/张导演_voice.flac",
@@ -1528,12 +1536,12 @@
       "url": "http://zhangshuxia.ltd:9000/code-to-video/code-to-video/videos/songkou_xianxia/wananbao_linxiaoxi_verse1_15s.mp4"
     },
     {
-      "path": "audio/voices/songkou_xiaonuomi_v2.flac",
-      "type": "audio",
-      "name": "songkou_xiaonuomi_v2.flac",
-      "size": 231621,
-      "object_key": "code-to-video/audio/voices/songkou_xiaonuomi_v2.flac",
-      "url": "http://zhangshuxia.ltd:9000/code-to-video/code-to-video/audio/voices/songkou_xiaonuomi_v2.flac"
+      "path": "videos/yaolu_s1/ep02_final.mp4",
+      "type": "video",
+      "name": "ep02_final.mp4",
+      "size": 23293941,
+      "object_key": "code-to-video/videos/yaolu_s1/ep02_final.mp4",
+      "url": "http://zhangshuxia.ltd:9000/code-to-video/code-to-video/videos/yaolu_s1/ep02_final.mp4"
     }
   ]
 }
