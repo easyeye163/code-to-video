@@ -1,6 +1,7 @@
 # RunningHub AI 音乐与语音识别工作流
 
 > 创建时间：2026-09-01
+> 更新时间：2026-09-05（音乐生成升级为三节点格式 + plus 实例）
 > 平台：RunningHub OpenAPI v2
 > API Key 环境变量：`RUNNINGHUB_API_KEY`
 
@@ -21,13 +22,18 @@
 ### 2.1 应用信息
 
 - **App ID**: `2094807049065558018`
-- **输入**: 歌曲风格 + 完整歌词文本
+- **输入**: 完整歌词文本 + 曲风结构化描述（三节点分离，互不干扰）
 - **输出**: mp3 音乐文件（含人声演唱）
-- **节点配置**:
-  - `nodeId: 55`, `fieldName: text` — 歌曲风格描述 + 完整歌词
+- **节点配置（三节点新格式）**:
+  - `nodeId: 55`, `fieldName: text` — 完整歌词（段落标签 + 括号编曲提示，**不放**曲风构想）
   - `nodeId: 49`, `fieldName: cfg` — 提示词强度（建议 1.5-2.0）
+  - `nodeId: 56`, `fieldName: text` — 曲风结构化描述（Global Metadata / Vocal Details / Arrangement 三段式英文）
+- **实例类型**: `instanceType: "plus"`（旧格式 default 已弃用，plus 出品质量更稳定）
 - **输出节点**: `nodeId: 9`, `outputType: mp3`
-- **时长**: 根据歌词长度自动生成（约 2-3 分钟）
+- **时长**: 根据歌词长度自动生成（约 2-4 分钟）
+- **实测消耗**: 约 110 coins/次（plus 实例，2026-09-05）
+
+> ⚠️ 旧二节点格式（nodeId 55 混合风格+歌词 + instanceType default）仍可调用，但新项目一律使用三节点格式，风格与歌词解耦后改曲风无需重写歌词。
 
 ### 2.2 调用方式
 
@@ -42,28 +48,33 @@ curl --request POST 'https://www.runninghub.cn/openapi/v2/run/ai-app/20948070490
     {
       "nodeId": "55",
       "fieldName": "text",
-      "fieldValue": "【曲风构想】\n中慢速中国风慢摇，深沉的 808 Bass 驱动着四拍子鼓点，古筝与二胡在迷幻的电音延迟（Delay）中交织，营造出古今交错的夜游意境。\n\n(Intro 前奏)\n(深沉的 Kick 鼓点低频敲击，伴随水波声与采样极重延迟的古筝单音，营造慢摇迷幻感)\n\n(Verse 1 主歌一)\n夜泊秦淮 岸边的灯火渐次熄灭\n笙歌散尽 谁在船头 泼墨成雪\n\n(Chorus 副歌)\n画舫摇呀摇 摇晃着千年的寂寞\n你在故事的角落 哼着哪首江南的歌\n\n(Outro 尾声)\n(鼓点逐渐抽离，只剩 Bass 低鸣与古筝余音缓缓 Fade Out)\n秦淮夜… 慢摇过客…",
-      "description": "歌曲风格及歌词"
+      "fieldValue": "(Intro 前奏)\n(深沉的 Kick 鼓点低频敲击，伴随水波声与采样极重延迟的古筝单音，营造慢摇迷幻感)\n\n(Verse 1 主歌一)\n夜泊秦淮 岸边的灯火渐次熄灭\n笙歌散尽 谁在船头 泼墨成雪\n\n(Chorus 副歌)\n画舫摇呀摇 摇晃着千年的寂寞\n你在故事的角落 哼着哪首江南的歌\n\n(Outro 尾声)\n(鼓点逐渐抽离，只剩 Bass 低鸣与古筝余音缓缓 Fade Out)\n秦淮夜… 慢摇过客…",
+      "description": "歌词"
     },
     {
       "nodeId": "49",
       "fieldName": "cfg",
       "fieldValue": "1.7",
       "description": "提示词强度"
+    },
+    {
+      "nodeId": "56",
+      "fieldName": "text",
+      "fieldValue": "[Global Metadata]\nGenre: Chinoiserie Downtempo, Chinese electronica ballad\nTempo: 92 BPM, 4/4 time signature\nMood: dreamy, nostalgic, night-drift atmosphere of an ancient water town\n\n[Vocal Details]\nLead vocal: soft ethereal female voice, Mandarin Chinese\nDelivery: intimate breathy verses, gently soaring chorus\n\n[Arrangement]\nIntro: deep 808 bass pulse, guzheng plucks drenched in delay\nVerse: sparse 808 groove, soft kick on quarter notes, erhu long notes\nChorus: full downtempo beat, guzheng and erhu counter-melody\nOutro: drums fade out, 808 low hum with guzheng residue",
+      "description": "曲风描述"
     }
   ],
-  "instanceType": "default",
+  "instanceType": "plus",
   "usePersonalQueue": "false"
 }'
 ```
 
-### 2.3 歌词提示词撰写规范
+### 2.3 歌词提示词撰写规范（节点 55）
+
+**要点**：歌词节点只写歌词本身 + 括号编曲提示，曲风全部移到节点 56，不要在歌词里写【曲风构想】段。
 
 **标准结构：**
 ```
-【曲风构想】
-（整体风格描述：曲风、BPM、配器、情绪、意境）
-
 (Intro 前奏)
 （配器/氛围描述，无人声）
 
@@ -90,7 +101,33 @@ curl --request POST 'https://www.runninghub.cn/openapi/v2/run/ai-app/20948070490
 （配器/收尾描述）
 ```
 
-### 2.4 查询结果
+### 2.4 曲风结构化描述撰写规范（节点 56）
+
+**三段式英文结构**，段标签固定为 `[Global Metadata]` / `[Vocal Details]` / `[Arrangement]`：
+
+```
+[Global Metadata]
+Genre: 曲风名（如 Chinoiserie Downtempo, Chinese electronica ballad）
+Tempo: BPM 数值 + 拍号
+Key: 调式（可写 pentatonic-leaning 引导五声音阶）
+Mood: 情绪关键词 + 一句意境描述
+Dynamics: 动态特征（restrained / subtle builds 等）
+
+[Vocal Details]
+Lead vocal: 声线类型 + 演唱语言
+Delivery: 主歌/副歌演唱方式（breathy verses, soaring chorus 等）
+Ad-libs: 和声/哼鸣等点缀
+
+[Arrangement]
+Intro: 前奏配器 + 氛围
+Verse: 主歌配器骨架
+Chorus: 副歌全奏编制
+Bridge/Outro: 过渡段与收尾处理
+```
+
+**常用配器英文对照**：古筝 guzheng、二胡 erhu、琵琶 pipa、竹笛 bamboo flute、洞箫 xiao flute、808 Bass（直接写）、Delay/延迟回声、tremolo 轮指。
+
+### 2.5 查询结果
 
 ```bash
 curl --request POST 'https://www.runninghub.cn/openapi/v2/query' \
@@ -120,14 +157,17 @@ curl --request POST 'https://www.runninghub.cn/openapi/v2/query' \
 }
 ```
 
-### 2.5 常用曲风参考
+### 2.6 常用曲风参考（写入节点 56）
 
-| 曲风 | 适用场景 | 关键词 |
+| 曲风 | 适用场景 | 曲风描述关键词（英文） |
 |------|----------|--------|
-| 中国风慢摇 | 古镇/仙侠/古风 | 古筝、二胡、808 Bass、四拍子、Delay |
-| 仙侠古风 | 修仙/战斗/情感 | 琵琶、笛子、弦乐、合唱、史诗感 |
-| 江南民谣 | 日常/温情/美食 | 木吉他、笛子、轻柔、治愈 |
-| 电子国风 | 现代+古风融合 | Synth、古筝采样、Trap、霓虹感 |
+| 中国风慢摇电子 | 古镇/夜游/国风 MV | Chinoiserie Downtempo, 808 bass, guzheng, erhu, delay |
+| 仙侠古风 | 修仙/战斗/情感 | Epic Chinese orchestral, pipa, strings, choir |
+| 江南民谣 | 日常/温情/美食 | Chinese folk ballad, acoustic guitar, bamboo flute, gentle |
+| 电子国风 | 现代+古风融合 | Chinese synth-pop, guzheng samples, trap hats, neon vibe |
+
+> 实测记录：《古镇之灵》民谣版（二节点+default）377s/76 coins；《古镇之灵》慢摇电子版（三节点+plus）191s/110 coins，新格式一次提交成功。
+
 
 ---
 
