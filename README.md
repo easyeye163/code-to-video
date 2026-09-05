@@ -132,12 +132,43 @@ python pipeline.py check   projects/songkou            # 校验配置/分镜/资
 python pipeline.py payload projects/songkou --ep 7     # 生成整集 payload（不消耗币）
 python pipeline.py submit  projects/songkou --ep 7 --seg 2 --wait   # 提交并等待成片
 python pipeline.py batch   projects/songkou --ep 7 [--continue-on-error]  # 串行批量生成
+python pipeline.py render  projects/songkou --ep 7 --title "第7集 时空对话" [--bgm music.mp3]  # 合成成片
+python pipeline.py init-project projects/新剧名        # 新剧脚手架（配置+模板+开工清单）
+python pipeline.py asset projects/新剧名 --character 某角色 [--three-view --ref-url URL]  # 素材自动生成
 ```
 
 - 资产（角色图/场景图/音色）在配置中只写仓库相对路径，由资源清单自动解析为 **MinIO URL**
 - 分镜级覆盖：如 `"scene_retention"` 可按段定制不变量（ep7 seg4 的"夕阳金光"即用此实现）
 - **并发处理（重要）**：RunningHub 并发上限 1，`batch` 串行执行——提交撞 421 自动等待重试（默认 30s×20 次），一段完成**自动提交下一段**；每段成片自动下载到 `output/`（或 `--save-dir` 指定目录），COS 链接 24h 失效的问题一并解决；状态文件 `output/ep<N>_batch_state.json` 支持中断续跑（已成功且成片在手的段自动跳过）
 - **验证结果**：songkou ep7 三段与手工版**逐字一致**（seg1 仅 Shot 分行规范化）；yaolu 5 个技能 demo **5/5 全部逐字一致**（含双角色节点布局对调、仙侠化元素、无音频行等全部项目级差异）
+
+### 成片合成（render）
+
+`pipeline.py render projects/songkou --ep 7 --title "第7集 时空对话" --bgm music.mp3`
+
+- 段视频自动查找：`output/epN_segM.mp4`（batch 产出）→ `source_root` 下的手工成片 `EP{N}段{M}_*.mp4`
+- 由分镜 `dialogue` 自动生成 SRT 并烧录字幕（时间轴按段视频**实际时长**偏移，不漂移；含片头时自动加偏移）
+- BGM 自动循环混音（音量 22%）、可选 2.5s 黑底片头、统一转码 1152×640/24fps
+- 产物：`output/epN_final.mp4`（交付级成片）+ `epN.srt`（外挂字幕备用）
+
+### 成本追踪
+
+batch 每段成功后记录 RunningHub 实际消耗（`consumeCoins`），批次结束输出账单（总币数/均值每段）——B 端报价的成本依据。
+
+### 新剧脚手架（init-project）与素材生产（asset）
+
+```bash
+python pipeline.py init-project projects/ancient_town_x --title "XX古镇奇缘" \
+    [--layout scene_at_166] [--no-voice-audio] [--source-root F:/path/to/assets]
+# → 生成 project.json 骨架 + 通用 6 段式模板 + 分镜 schema + 开工清单（checklist）
+
+python pipeline.py asset projects/ancient_town_x --character heroine        # Z-image 生成角色立绘
+python pipeline.py asset projects/ancient_town_x --character heroine \
+    --three-view --ref-url <上一步输出的立绘URL>                             # KREA 生成三视图
+python pipeline.py asset projects/ancient_town_x --scene old_street         # Z-image 生成场景图
+```
+
+asset 产物自动入 MinIO + 资源清单 + 回写 project.json 的 `ref_image`——**"换一个古镇"从此是填空题**：填角色设定 → asset 批产形象 → 写分镜 → batch 出片 → render 成片。
 
 ### 新建一个短剧项目
 
