@@ -1,0 +1,73 @@
+{
+  "name": "congbing",
+  "title": "永泰葱饼 · 古镇酥香（一分钟宣传片）",
+  "style_qualifier": "永泰葱饼古镇美食宣传片",
+  "engine": {
+    "provider": "runninghub",
+    "app_id": "2090774740146413570",
+    "instance_type": "plus",
+    "defaults": {
+      "duration": 15,
+      "aspect_ratio": "16:9 (Widescreen)",
+      "megapixels": "0.7000000000000001",
+      "use_personal_queue": "false",
+      "aspect_ratio_fielddata": "[\"COMBO\", {\"default\": \"1:1 (Square)\", \"options\": [\"1:1 (Square)\", \"2:3 (Portrait Photo)\", \"3:2 (Photo)\", \"3:4 (Portrait Standard)\", \"4:3 (Standard)\", \"9:16 (Portrait Widescreen)\", \"16:9 (Widescreen)\", \"21:9 (Ultrawide)\"], \"tooltip\": \"The aspect ratio for the output dimensions.\", \"multiselect\": false}]"
+    }
+  },
+  "style": {
+    "visual": "目标视频采用电影感美食宣传片风格，清晨暖调光线，嵩口古镇烟火气，白墙黛瓦古街背景，食物特写微距质感，浅景深，轻度暖色胶片调。",
+    "retention": "电影感美食宣传片风格，清晨暖调光线，古镇烟火氛围，食物微距质感，暖色胶片调"
+  },
+  "voice_audio_default": true,
+  "prompt_templates": {
+    "single": "prompt_template_single.txt",
+    "dual": "prompt_template_dual.txt"
+  },
+  "characters": {
+    "shifu": {
+      "name": "饼铺陈师傅",
+      "gender": "男性",
+      "role": "男性角色",
+      "identity": "饼铺陈师傅，55岁嵩口老师傅，花白短发，深蓝粗布围裙配白色汗衫，袖口挽起，双手沾着面粉，憨厚温暖的笑容",
+      "ref_image": "images/generated/congbing/shifu.png",
+      "voice": "audio/voices/王婶_voice.flac",
+      "retention": "陈师傅的花白短发、深蓝围裙、白汗衫全程一致",
+      "voice_desc": "热络亲切的中年女声（旁白）"
+    }
+  },
+  "scenes": {
+    "shop_front": {
+      "name": "饼铺门面",
+      "ref_image": "images/generated/congbing/scene_shop_front.png",
+      "desc": "福建永泰嵩口古镇的百年葱饼老铺，清晨薄雾，木质门面挂着手写'永泰葱饼'招牌，暖黄灯光从门内透出，门前青石板古街",
+      "extra": "",
+      "anchor": "店铺门面纵深与招牌位置",
+      "retention": "老铺木质门面、招牌、青石板古街保持稳定"
+    },
+    "stove": {
+      "name": "炭火烤炉",
+      "ref_image": "images/generated/congbing/scene_stove.png",
+      "desc": "传统炭火大烤炉特写，炉壁上贴着一圈金黄葱饼，炉膛炭火通红，青烟袅袅上升，温暖火光",
+      "extra": "",
+      "anchor": "炉体形态与炉壁弧度",
+      "retention": "炭火烤炉的炉体、炉壁弧度保持稳定，火光位置稳定"
+    },
+    "bing": {
+      "name": "葱饼特写",
+      "ref_image": "images/generated/congbing/scene_bing.png",
+      "desc": "刚出炉的永泰葱饼特写，金黄酥脆表皮撒满白芝麻，掰开的断面露出层层酥皮与翠绿葱花肉馅，热气升腾，置于原木案板上",
+      "extra": "",
+      "anchor": "饼的形态与断面层次",
+      "retention": "葱饼的金黄表皮、芝麻、断面层次保持稳定"
+    },
+    "panorama": {
+      "name": "嵩口全景",
+      "ref_image": "images/嵩口真实场景图/嵩口全景.png",
+      "desc": "大樟溪穿镇而过，白墙黑瓦明清古民居群依山傍水，黄昏暖光，航拍俯瞰全貌",
+      "extra": "",
+      "anchor": "建筑群纵深、溪流走向与黄昏氛围",
+      "retention": "嵩口全景的建筑群轮廓、溪流走向保持稳定"
+    }
+  },
+  "source_root": "F:/Downloads/h3-video-coding-main"
+}
