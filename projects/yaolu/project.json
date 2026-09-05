@@ -70,10 +70,10 @@
       "gender": "女性",
       "role": "女性孩童角色",
       "ref_image": "images/songkou_3d_characters/xiao_nuomi_3d_turnaround.png",
-      "voice": "audio/voices/songkou_xiaonuomi.flac",
+      "voice": "audio/voices/songkou_xiaonuomi_v2.flac",
       "identity": "小糯米，8岁，双马尾，粉色小旗袍，手持糖葫芦，天生灵瞳，天真可爱",
       "retention": "小糯米的圆脸、双马尾、粉色着装全程一致",
-      "voice_desc": "天真烂漫的稚气童声，清脆活泼，尾音上扬"
+      "voice_desc": "天真烂漫的稚气童声，惊呼清亮"
     },
     "zhangdaoyan": {
       "name": "张导演",
@@ -84,6 +84,26 @@
       "identity": "张导演，35岁，短发戴眼镜，卡其色摄影背心，手持摄像机",
       "retention": "张导演的发型、眼镜、摄影背心、摄像机全程一致",
       "voice_desc": "好奇执着的青年男声"
+    },
+    "treeling": {
+      "name": "千年树灵",
+      "gender": "男性",
+      "role": "树灵",
+      "ref_image": "images/songkou_3d_scenes/ancient_banyan_xianxia.png",
+      "voice": "audio/voices/songkou_elder.flac",
+      "identity": "千年树灵，古榕树干上浮现的苍老人脸，双目翠绿光芒，声音如古木低语",
+      "retention": "树灵为古榕树干上的光影面孔，形态随树身稳定",
+      "voice_desc": "苍老低沉的树灵之声，如古木低语"
+    },
+    "villager": {
+      "name": "古镇居民",
+      "gender": "女性",
+      "role": "居民",
+      "ref_image": "images/songkou_3d_scenes_ig2img/嵩口全景_ig2img.png",
+      "voice": "audio/voices/王婶_voice.flac",
+      "identity": "嵩口古镇居民，普通便装，惊慌奔逃的路人",
+      "retention": "居民为背景路人，不做特写",
+      "voice_desc": "热络爽朗的中年女声（路人惊呼）"
     }
   },
   "scenes": {
