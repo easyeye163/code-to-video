@@ -20,6 +20,12 @@ code-to-video 制作流水线
   python pipeline.py submit  projects/songkou --ep 7 --seg 1 [--wait]   # 提交（消耗币）
   python pipeline.py batch   projects/songkou --ep 7 [--continue-on-error]  # 串行批量（自动排队+下载）
 
+单并发适配（batch）：
+  - 同一时刻至多一个在途任务，421 占用自动等待重试
+  - 提交成功立即落盘 taskId；中断重跑续接轮询，绝不重复提交烧币
+  - 成片 SUCCESS 但本地缺失：按记录 URL 重下，URL 过期才重新生成
+  - 轮询超时保留 taskId，重跑续接等待；网络抖动自动重试
+
 资产解析：角色图/场景图/音色在配置中只写仓库相对路径，由 resources/minio-manifest.json
 自动解析为 MinIO URL。清单缺失时先运行：
   python scripts/minio_sync.py scan <资源根目录> && python scripts/minio_sync.py sync <资源根目录>
@@ -307,19 +313,37 @@ def is_concurrency_error(resp):
 
 
 def download_file(url, path: Path):
+    """下载到 .part 临时文件，完整后原子改名，避免残留半截文件被误判为已下载。"""
     import urllib.request
 
     path.parent.mkdir(parents=True, exist_ok=True)
-    with urllib.request.urlopen(url, timeout=300) as r, open(path, "wb") as f:
+    tmp = path.with_name(path.name + ".part")
+    with urllib.request.urlopen(url, timeout=300) as r, open(tmp, "wb") as f:
         while True:
             chunk = r.read(1 << 16)
             if not chunk:
                 break
             f.write(chunk)
+    tmp.replace(path)
     return path
 
 
-def cmd_submit(project_dir: Path, ep: int, seg: int, wait=False):
+def api_with_retry(url, body, key, attempts=3, base_delay=5):
+    """网络抖动自动重试的 API 调用；轮询期间一次瞬时断网不应让整个批次崩溃丢任务。"""
+    last = None
+    for i in range(1, attempts + 1):
+        try:
+            return runninghub_api(url, body, key)
+        except Exception as e:  # noqa: BLE001
+            last = e
+            if i < attempts:
+                delay = base_delay * i
+                print(f"    ⚠ 网络异常：{e}，{delay}s 后重试 {i}/{attempts - 1}")
+                time.sleep(delay)
+    raise last
+
+
+def cmd_submit(project_dir: Path, ep: int, seg: int, wait=False, wait_timeout=900):
     key = os.environ.get("RUNNINGHUB_API_KEY")
     if not key:
         die("未设置环境变量 RUNNINGHUB_API_KEY")
@@ -343,11 +367,13 @@ def cmd_submit(project_dir: Path, ep: int, seg: int, wait=False):
     print(f"  手动查询：POST {RUNNINGHUB_BASE}/query {{\"taskId\": \"{task_id}\"}}")
 
     if wait:
-        for i in range(1, 31):
+        waited = 0
+        while waited < wait_timeout:
             time.sleep(10)
-            q = runninghub_api(f"{RUNNINGHUB_BASE}/query", {"taskId": task_id}, key)
+            waited += 10
+            q = api_with_retry(f"{RUNNINGHUB_BASE}/query", {"taskId": task_id}, key)
             st = (q.get("taskStatus") or q.get("status") or "?").upper()
-            print(f"  [{i * 10}s] {st}")
+            print(f"  [{waited}s] {st}")
             if st == "SUCCESS":
                 for r in q.get("results") or []:
                     print("  ✓ 成片：", r.get("url"))
@@ -355,14 +381,20 @@ def cmd_submit(project_dir: Path, ep: int, seg: int, wait=False):
                 return
             if st == "FAILED":
                 die(f"任务失败：{json.dumps(q, ensure_ascii=False)[:300]}")
+        print(f"  ⚠ 等待超时（>{wait_timeout}s），taskId={task_id} 仍在运行，可稍后手动查询")
 
 
 def cmd_batch(project_dir: Path, ep: int, seg=None, continue_on_error=False,
               task_timeout=900, retry_wait=30, max_retries=20, save_dir=None):
-    """串行批量生成：自动处理并发占用（421）等待，一段完成后自动提交下一段。
+    """串行批量生成（单并发适配）：同一时刻至多一个在途任务。
 
-    状态文件 projects/<项目>/output/ep<N>_batch_state.json 记录每段进度，
-    中断后重跑会自动跳过已成功且成片已下载的段。
+    - 并发占用（421）自动等待重试
+    - 提交成功立即落盘 SUBMITTED 状态；中断重跑优先续接轮询，绝不重复提交烧币
+    - 成片 SUCCESS 但本地文件缺失时，用状态里记录的 URL 重新下载，不重新生成
+    - 网络抖动自动重试，轮询期间异常不丢任务
+    - 轮询超时保留 taskId（POLLING），重跑续接该任务继续等，不重新提交
+
+    状态文件 projects/<项目>/output/ep<N>_batch_state.json 记录每段进度。
     """
     key = os.environ.get("RUNNINGHUB_API_KEY")
     if not key:
@@ -383,71 +415,124 @@ def cmd_batch(project_dir: Path, ep: int, seg=None, continue_on_error=False,
     def save_state():
         state_path.write_text(json.dumps(state, ensure_ascii=False, indent=2), encoding="utf-8")
 
+    def files_ok(st):
+        return bool(st.get("files")) and all(Path(f).exists() for f in st["files"])
+
     def finished(s):
         st = state.get(str(s["seg"]), {})
-        return (st.get("status") == "SUCCESS" and st.get("files")
-                and all(Path(f).exists() for f in st["files"]))
+        return st.get("status") == "SUCCESS" and files_ok(st)
 
     todo = [s for s in segs if not finished(s)]
     print(f"批次 ep{ep}：共 {len(segs)} 段，待处理 {len(todo)}，已完成跳过 {len(segs) - len(todo)}")
-    print(f"串行策略：并发占用每 {retry_wait}s 重试（最多 {max_retries} 次），轮询 10s/次，单任务超时 {task_timeout}s")
+    print(f"单并发串行策略：421 占用每 {retry_wait}s 重试（最多 {max_retries} 次），"
+          f"轮询 10s/次，单任务超时 {task_timeout}s")
 
     app_id = project.cfg["engine"]["app_id"]
+    submit_url = f"{RUNNINGHUB_BASE}/run/ai-app/{app_id}"
+    query_url = f"{RUNNINGHUB_BASE}/query"
     ok = fail = 0
 
     for idx, s in enumerate(todo, 1):
         tag = f"ep{ep} seg{s['seg']}"
-        try:
-            payload = build_payload(project, s, ep)
-        except ValueError as e:
-            fail += 1
-            state[str(s["seg"])] = {"status": "BUILD_FAILED", "error": str(e)}
-            save_state()
-            print(f"✗ [{tag}] payload 生成失败：{e}")
-            if not continue_on_error:
-                die(f"{tag} 中止（--continue-on-error 可跳过继续）")
-            continue
+        st_key = str(s["seg"])
+        st = state.get(st_key, {})
 
-        # ---- 提交（处理并发占用 421）----
-        task_id = None
-        for attempt in range(1, max_retries + 1):
-            resp = runninghub_api(f"{RUNNINGHUB_BASE}/run/ai-app/{app_id}", payload, key)
-            task_id = resp.get("taskId")
-            if task_id:
-                break
-            err = f"{resp.get('errorCode', '')} {resp.get('errorMessage', '')}".strip()
-            if not is_concurrency_error(resp):
-                state[str(s["seg"])] = {"status": "SUBMIT_FAILED", "error": err}
+        # ---- 断点续跑 A：曾 SUCCESS 但本地成片缺失 → 按记录 URL 重下，不重新生成 ----
+        if st.get("status") == "SUCCESS" and st.get("urls") and not files_ok(st):
+            print(f"  [{tag}] 曾生成成功但本地成片缺失，按原 URL 重新下载（不重新提交）")
+            files = []
+            for i, url in enumerate(st["urls"], 1):
+                if not url:
+                    continue
+                suffix = f"_{i}" if len(st["urls"]) > 1 else ""
+                path = save_dir / f"ep{ep}_seg{s['seg']}{suffix}.mp4"
+                try:
+                    download_file(url, path)
+                    files.append(str(path))
+                    print(f"    ✓ 重新下载 {path.name}（{path.stat().st_size // 1024} KB）")
+                except Exception as e:  # noqa: BLE001
+                    print(f"    ⚠ 重下失败（URL 可能已过 24h）：{e}")
+            if files and all(Path(f).exists() for f in files):
+                st["files"] = files
+                save_state()
+                ok += 1
+                continue
+            print("    ✗ 重下失败，转为重新生成")
+            st = state[st_key] = {"status": "PENDING"}
+
+        # ---- 断点续跑 B：在途任务（SUBMITTED/POLLING）→ 续接轮询，不重复提交 ----
+        task_id = st.get("taskId") if st.get("status") in ("SUBMITTED", "POLLING") else None
+        if task_id:
+            print(f"  [{tag}]（{idx}/{len(todo)}）检测到在途任务 taskId={task_id}，续接轮询")
+
+        if task_id is None:
+            # ---- 组装 payload ----
+            try:
+                payload = build_payload(project, s, ep)
+            except ValueError as e:
+                fail += 1
+                state[st_key] = {"status": "BUILD_FAILED", "error": str(e)}
+                save_state()
+                print(f"✗ [{tag}] payload 生成失败：{e}")
+                if not continue_on_error:
+                    die(f"{tag} 中止（--continue-on-error 可跳过继续）")
+                continue
+
+            # ---- 提交（421 等待重试；网络异常自动重试）----
+            task_id = None
+            err = ""
+            for attempt in range(1, max_retries + 1):
+                try:
+                    resp = api_with_retry(submit_url, payload, key)
+                except Exception as e:  # noqa: BLE001
+                    err = f"网络异常：{e}"
+                    print(f"  [{tag}] {err}，{retry_wait}s 后重试 {attempt}/{max_retries}")
+                    time.sleep(retry_wait)
+                    continue
+                task_id = resp.get("taskId")
+                if task_id:
+                    break
+                err = f"{resp.get('errorCode', '')} {resp.get('errorMessage', '')}".strip()
+                if not is_concurrency_error(resp):
+                    break
+                print(f"  [{tag}] 并发占用（{err}），{retry_wait}s 后重试 {attempt}/{max_retries}")
+                time.sleep(retry_wait)
+            if not task_id:
+                fail += 1
+                state[st_key] = {"status": "SUBMIT_FAILED", "error": err}
                 save_state()
                 print(f"✗ [{tag}] 提交失败：{err}")
-                task_id = None
-                break
-            print(f"  [{tag}] 并发占用（{err}），{retry_wait}s 后重试 {attempt}/{max_retries}")
-            time.sleep(retry_wait)
-        if not task_id:
-            fail += 1
-            if not continue_on_error:
-                die(f"{tag} 提交未成功，批次中止（--continue-on-error 可跳过继续）")
-            continue
-        print(f"  [{tag}]（{idx}/{len(todo)}）已提交 taskId={task_id}")
+                if not continue_on_error:
+                    die(f"{tag} 提交未成功，批次中止（--continue-on-error 可跳过继续）")
+                continue
+            print(f"  [{tag}]（{idx}/{len(todo)}）已提交 taskId={task_id}")
+            state[st_key] = {"status": "SUBMITTED", "taskId": task_id}
+            save_state()  # 立即落盘：此后任何中断，重跑都只会续接轮询，不会重复提交
 
-        # ---- 轮询 ----
+        # ---- 轮询（网络异常不丢任务；超时保留 taskId 供重跑续接）----
         final = None
         start = time.time()
         while time.time() - start < task_timeout:
             time.sleep(10)
-            q = runninghub_api(f"{RUNNINGHUB_BASE}/query", {"taskId": task_id}, key)
+            try:
+                q = api_with_retry(query_url, {"taskId": task_id}, key)
+            except Exception as e:  # noqa: BLE001
+                print(f"    ⚠ 查询异常：{e}（taskId={task_id} 已落盘，中断重跑可续接）")
+                continue
             stt = (q.get("taskStatus") or q.get("status") or "?").upper()
             print(f"    [{int(time.time() - start)}s] {stt}")
             if stt in ("SUCCESS", "FAILED"):
                 final = q
                 break
+            state[st_key] = {"status": "POLLING", "taskId": task_id}
+            save_state()
 
         if final is None:
             fail += 1
-            state[str(s["seg"])] = {"status": "TIMEOUT", "taskId": task_id}
+            state[st_key] = {"status": "POLLING", "taskId": task_id}
             save_state()
-            print(f"✗ [{tag}] 轮询超时（>{task_timeout}s），taskId={task_id} 可到控制台查看")
+            print(f"✗ [{tag}] 轮询超时（>{task_timeout}s），taskId={task_id} 仍在运行；"
+                  f"重跑将续接该任务（不重复提交）")
             if not continue_on_error:
                 die(f"{tag} 超时中止（--continue-on-error 可跳过继续）")
             time.sleep(10)
@@ -456,12 +541,13 @@ def cmd_batch(project_dir: Path, ep: int, seg=None, continue_on_error=False,
         # ---- 成功：下载成片（COS 链接 24h 失效，必须及时落地）----
         if (final.get("taskStatus") or final.get("status")).upper() == "SUCCESS":
             results = final.get("results") or []
+            urls = [r.get("url") for r in results]
             files = []
             for i, r in enumerate(results, 1):
                 url = r.get("url")
                 if not url:
                     continue
-                ext = (r.get("outputType") or "bin").lstrip(".")
+                ext = (r.get("outputType") or "mp4").lstrip(".")
                 suffix = f"_{i}" if len(results) > 1 else ""
                 path = save_dir / f"ep{ep}_seg{s['seg']}{suffix}.{ext}"
                 try:
@@ -469,20 +555,23 @@ def cmd_batch(project_dir: Path, ep: int, seg=None, continue_on_error=False,
                     files.append(str(path))
                     print(f"    ✓ 已下载 {path.name}（{path.stat().st_size // 1024} KB）")
                 except Exception as e:  # noqa: BLE001
-                    print(f"    ⚠ 下载失败：{e}（COS 链接 24h 内有效，请手动保存 {url}）")
-            state[str(s["seg"])] = {"status": "SUCCESS", "taskId": task_id, "files": files,
-                                    "urls": [r.get("url") for r in results]}
+                    print(f"    ⚠ 下载失败：{e}（URL 已存入状态，重跑自动续下，不重新生成）")
+            state[st_key] = {"status": "SUCCESS", "taskId": task_id, "files": files, "urls": urls}
             save_state()
-            ok += 1
-            time.sleep(10)  # 提交间隔，缓解 API 压力
+            if files_ok(state[st_key]):
+                ok += 1
+            else:
+                fail += 1  # 任务成功但文件没落地：计为失败，重跑走 URL 重下分支
+            time.sleep(10)  # 单并发：确认前一段彻底结束再提交下一段
             continue
 
         # ---- 失败 ----
         fail += 1
         err = f"{final.get('errorCode', '')} {final.get('errorMessage', '')}".strip()
-        state[str(s["seg"])] = {"status": "FAILED", "taskId": task_id, "error": err}
+        state[st_key] = {"status": "FAILED", "taskId": task_id, "error": err}
         save_state()
         print(f"✗ [{tag}] 任务失败：{err}")
+        time.sleep(10)  # 单并发：留出间隔再提交下一段
         if not continue_on_error:
             die(f"{tag} 失败中止（--continue-on-error 可跳过继续）")
 
@@ -512,8 +601,9 @@ def main():
     p.add_argument("--ep", type=int, required=True, help="集数")
     p.add_argument("--seg", type=int, required=True, help="段号")
     p.add_argument("--wait", action="store_true", help="轮询直到任务完成")
+    p.add_argument("--wait-timeout", type=int, default=900, help="--wait 轮询超时秒数，默认 900")
 
-    p = sub.add_parser("batch", help="串行批量生成：自动处理并发占用等待，一段完成自动提交下一段")
+    p = sub.add_parser("batch", help="串行批量生成（单并发适配）：421等待+断点续接不重复提交+URL重下")
     p.add_argument("project", help="项目目录")
     p.add_argument("--ep", type=int, required=True, help="集数")
     p.add_argument("--seg", type=int, help="只跑指定段（缺省整集）")
@@ -532,7 +622,7 @@ def main():
     elif args.cmd == "payload":
         cmd_payload(project_dir, args.ep, args.seg, args.stdout)
     elif args.cmd == "submit":
-        cmd_submit(project_dir, args.ep, args.seg, args.wait)
+        cmd_submit(project_dir, args.ep, args.seg, args.wait, args.wait_timeout)
     elif args.cmd == "batch":
         cmd_batch(project_dir, args.ep, args.seg, args.continue_on_error,
                   args.task_timeout, args.retry_wait, args.save_dir)
