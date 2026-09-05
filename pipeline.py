@@ -38,6 +38,7 @@ import json
 import os
 import re
 import shutil
+from urllib.parse import quote
 import sys
 import time
 from pathlib import Path
@@ -245,9 +246,43 @@ def build_payload(project: Project, seg: dict, ep: int):
     }
 
 
+def _check_dialogue_budget(warnings, seg, tag):
+    """台词预算校验：中文配音约 4.8 字/秒。超预算→念不完被吞词；过少→模型填充/重复念白。"""
+    SPEED = 4.8
+
+    def _secs(t):
+        m = re.match(r"(\d+(?:\.\d+)?)s-(\d+(?:\.\d+)?)s", str(t))
+        return (float(m.group(1)), float(m.group(2))) if m else (None, None)
+
+    seg_lines = 0
+    for i, shot in enumerate(seg.get("shots", []), 1):
+        dlg = shot.get("dialogue")
+        if not dlg:
+            continue
+        seg_lines += 1
+        a, b = _secs(shot.get("time"))
+        if a is None:
+            continue
+        chars = len(re.sub(r"[，。！？…、；：\"''\s—-]", "", dlg))
+        budget = (b - a) * SPEED
+        if chars > budget * 1.05:
+            warnings.append(
+                f"{tag} shot{i}: 台词 {chars} 字 / 时段 {b - a:.0f}s 预算 {budget:.0f} 字 —— 可能念不完被吞词，"
+                f"建议扩时段或精简台词")
+    total_chars = sum(len(re.sub(r"[，。！？…、；：\"''\s—-]", "", s.get("dialogue", "")))
+                      for s in seg.get("shots", []))
+    dur = float(seg.get("duration", 15))
+    if 0 < total_chars < dur * SPEED * 0.28:
+        warnings.append(
+            f"{tag}: 全段台词仅 {total_chars} 字 / {dur:.0f}s —— 台词过少，模型可能填充或重复念白")
+    if seg_lines > 3:
+        warnings.append(f"{tag}: 单段 {seg_lines} 句台词偏密，多人对话易串味，建议拆段")
+
+
 def cmd_check(project_dir: Path):
     project = Project(project_dir)
     problems = []
+    warnings = []
 
     for key, c in project.characters.items():
         try:
@@ -290,16 +325,22 @@ def cmd_check(project_dir: Path):
                 if not v.get("voice"):
                     problems.append(f"{tag} 角色 {v['name']} 无音色文件")
                 render_prompt(project, seg)  # 完整渲染一遍，暴露模板/字段问题
+                _check_dialogue_budget(warnings, seg, tag)
             except ValueError as e:
                 problems.append(f"{tag} {e}")
 
+    if warnings:
+        print(f"⚠ {len(warnings)} 条台词预算提醒（不阻断，但影响成片台词保真）：")
+        for x in warnings:
+            print("  -", x)
     if problems:
         print(f"发现 {len(problems)} 个问题：")
         for x in problems:
             print("  -", x)
         raise SystemExit(1)
+    tail = f"；台词提醒 {len(warnings)} 条" if warnings else "，台词预算全部合规"
     print(f"✓ 项目校验通过：角色 {len(project.characters)} / 场景 {len(project.scenes)} / "
-          f"分镜 {len(sbs)} 集，全部资产可解析为 MinIO URL，模板渲染正常")
+          f"分镜 {len(sbs)} 集，全部资产可解析为 MinIO URL，模板渲染正常{tail}")
 
 
 def cmd_payload(project_dir: Path, ep: int, seg=None, stdout=False):
@@ -1095,6 +1136,111 @@ def cmd_asset(project_dir: Path, character=None, scene=None, three_view=False,
 
 
 
+
+# ==================== verify：台词保真验收（ASR 回读比对） ====================
+
+def _srt_to_text(srt_content: str):
+    lines = []
+    for line in srt_content.splitlines():
+        line = line.strip()
+        if not line or line.isdigit() or "-->" in line:
+            continue
+        lines.append(line)
+    return "".join(lines)
+
+
+def _norm_cn(s: str):
+    return re.sub(r"[，。！？…、；：\s—.?!-]", "", s)
+
+
+def cmd_verify(project_dir: Path, ep: int, seg: int, threshold=60.0):
+    """台词保真验收：段视频音频 → ASR 回读 → 与剧本台词比对相似度。"""
+    from difflib import SequenceMatcher
+    import subprocess as _sp
+
+    key = os.environ.get("RUNNINGHUB_API_KEY")
+    if not key:
+        die("未设置环境变量 RUNNINGHUB_API_KEY")
+    ffmpeg = shutil.which("ffmpeg") or "ffmpeg"
+    project = Project(project_dir)
+    sb = project.storyboard(ep)
+    seg_data = next((s for s in sb["segments"] if s["seg"] == seg), None)
+    if not seg_data:
+        die(f"未找到分镜：ep{ep} seg{seg}")
+    expected = [s["dialogue"] for s in seg_data.get("shots", []) if s.get("dialogue")]
+    if not expected:
+        print(f"ep{ep} seg{seg} 无剧本台词（纯画面段），跳过比对")
+        return
+
+    clip = find_clip(project, ep, seg)
+    if not clip:
+        die(f"段视频缺失：ep{ep} seg{seg}（先 batch）")
+
+    # 1. 提取音频
+    out_dir = project_dir / "output"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    audio = out_dir / f"ep{ep}_seg{seg}_audio.mp3"
+    _sp.run([ffmpeg, "-y", "-i", str(clip), "-vn", "-c:a", "libmp3lame", "-q:a", "5",
+             str(audio)], check=True, capture_output=True)
+
+    # 2. 上传 MinIO（公开 URL 供 ASR 拉取）
+    cfg = json.load(open(ROOT / "scripts" / "minio_config.json", encoding="utf-8"))
+    from minio import Minio
+    c = _minio_client_for_upload(cfg)
+    obj = f"{cfg['prefix']}/tmp/verify/ep{ep}_seg{seg}_audio.mp3"
+    c.fput_object(cfg["bucket"], obj, str(audio), content_type="audio/mpeg")
+    audio_url = f"{cfg['public_base_url']}/{cfg['bucket']}/{quote(obj, safe='/')}"
+
+    # 3. ASR
+    print(f"ASR 识别中（ep{ep} seg{seg}）…")
+    resp = runninghub_api(f"{RUNNINGHUB_BASE}/run/ai-app/2094729697874763777",
+                          {"nodeInfoList": [{"nodeId": "25", "fieldName": "audio",
+                                             "fieldValue": audio_url}],
+                           "instanceType": "default"}, key)
+    task_id = resp.get("taskId")
+    if not task_id:
+        die(f"ASR 提交失败：{json.dumps(resp, ensure_ascii=False)[:200]}")
+    start = time.time()
+    srt_url = None
+    while time.time() - start < 300:
+        time.sleep(8)
+        q = runninghub_api(f"{RUNNINGHUB_BASE}/query", {"taskId": task_id}, key)
+        st = (q.get("taskStatus") or q.get("status") or "?").upper()
+        if st == "SUCCESS":
+            results = q.get("results") or []
+            if results and results[0].get("url"):
+                srt_url = results[0]["url"]
+            break
+        if st == "FAILED":
+            die(f"ASR 失败：{json.dumps(q, ensure_ascii=False)[:200]}")
+    if not srt_url:
+        die("ASR 轮询超时")
+    coins = (q.get("usage") or {}).get("consumeCoins") or 0
+
+    # 4. 下载并比对
+    import urllib.request as _u
+    with _u.urlopen(srt_url, timeout=60) as r:
+        srt_text = _srt_to_text(r.read().decode("utf-8", "replace"))
+    heard = _norm_cn(srt_text)
+    print(f"\n台词保真报告  ep{ep} seg{seg}（ASR 消耗 {coins} 币）")
+    print(f"  剧本台词 {len(expected)} 句 | ASR 回读 {len(heard)} 字")
+    ok = 0
+    for dlg in expected:
+        d = _norm_cn(dlg)
+        ratio = SequenceMatcher(None, d, heard).find_longest_match(0, len(d), 0, len(heard))
+        cov = (ratio.size / len(d) * 100) if d else 100.0
+        mark = "✓" if cov >= threshold else "✗"
+        if cov >= threshold:
+            ok += 1
+        print(f"  {mark} [{cov:5.1f}%] {dlg[:36]}{'…' if len(dlg) > 36 else ''}")
+    rate = ok / len(expected) * 100
+    print(f"\n  保真率：{ok}/{len(expected)} 句（阈值 {threshold:.0f}% 字符覆盖率）"
+          + ("  ✓ 通过" if rate == 100 else "  ⚠ 存在偏差句，建议重跑该段"))
+    if rate < 100:
+        raise SystemExit(1)
+
+
+
 def main():
     ap = argparse.ArgumentParser(
         description="code-to-video 制作流水线：分镜 + 项目配置 + 提示词模板 → RunningHub payload")
@@ -1153,6 +1299,12 @@ def main():
     p.add_argument("--ref-url", help="立绘图片 URL（--three-view 必需）")
     p.add_argument("--dry-run", action="store_true", help="只打印提示词，不提交")
 
+    p = sub.add_parser("verify", help="台词保真验收：段视频 ASR 回读 vs 剧本台词比对")
+    p.add_argument("project", help="项目目录")
+    p.add_argument("--ep", type=int, required=True, help="集数")
+    p.add_argument("--seg", type=int, required=True, help="段号")
+    p.add_argument("--threshold", type=float, default=60.0, help="单句字符覆盖率阈值%%，默认 60")
+
     args = ap.parse_args()
     project_dir = Path(args.project)
     if args.cmd != "init-project" and not project_dir.exists():
@@ -1176,6 +1328,8 @@ def main():
     elif args.cmd == "asset":
         cmd_asset(project_dir, args.character, args.scene, args.three_view,
                   args.ref_url, args.dry_run)
+    elif args.cmd == "verify":
+        cmd_verify(project_dir, args.ep, args.seg, args.threshold)
 
 
 if __name__ == "__main__":

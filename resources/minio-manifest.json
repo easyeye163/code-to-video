@@ -1,11 +1,11 @@
 {
-  "updated": "2026-09-05T20:40:22+08:00",
+  "updated": "2026-09-05T22:14:46+08:00",
   "endpoint": "zhangshuxia.ltd:9000",
   "bucket": "code-to-video",
   "prefix": "code-to-video",
   "public_base_url": "http://zhangshuxia.ltd:9000",
-  "total": 189,
-  "total_size": 676859731,
+  "total": 191,
+  "total_size": 702910967,
   "resources": [
     {
       "path": "audio/01_温暖治愈男生.flac",
@@ -992,6 +992,14 @@
       "url": "http://zhangshuxia.ltd:9000/code-to-video/code-to-video/videos/promo/yaolu_congbing_ep1_final.mp4"
     },
     {
+      "path": "videos/promo/yaolu_congbing_ep1_final_v2.mp4",
+      "type": "video",
+      "name": "yaolu_congbing_ep1_final_v2.mp4",
+      "size": 25427174,
+      "object_key": "code-to-video/videos/promo/yaolu_congbing_ep1_final_v2.mp4",
+      "url": "http://zhangshuxia.ltd:9000/code-to-video/code-to-video/videos/promo/yaolu_congbing_ep1_final_v2.mp4"
+    },
+    {
       "path": "videos/songkou-vlog/万安堡.mp4",
       "type": "video",
       "name": "万安堡.mp4",
@@ -1518,6 +1526,14 @@
       "size": 4249849,
       "object_key": "code-to-video/videos/songkou_xianxia/wananbao_linxiaoxi_verse1_15s.mp4",
       "url": "http://zhangshuxia.ltd:9000/code-to-video/code-to-video/videos/songkou_xianxia/wananbao_linxiaoxi_verse1_15s.mp4"
+    },
+    {
+      "path": "audio/voices/songkou_xiaonuomi_v2.flac",
+      "type": "audio",
+      "name": "songkou_xiaonuomi_v2.flac",
+      "size": 231621,
+      "object_key": "code-to-video/audio/voices/songkou_xiaonuomi_v2.flac",
+      "url": "http://zhangshuxia.ltd:9000/code-to-video/code-to-video/audio/voices/songkou_xiaonuomi_v2.flac"
     }
   ]
 }
