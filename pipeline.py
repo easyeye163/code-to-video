@@ -30,6 +30,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import sys
 import time
 from pathlib import Path
@@ -117,7 +118,13 @@ def render_prompt(project: Project, seg: dict):
     """组装 6 段式提示词，返回 (prompt文本, p1角色, p2角色或None, 场景, 音色角色)"""
     where = f"ep? seg{seg.get('seg')}"
     p1 = project.char(seg.get("p1"), where)
+    # 分段级覆盖：分镜可用 p1_identity / p2_identity / scene_desc 等前缀字段覆盖项目默认
+    _P_KEYS = ("identity", "retention", "voice_desc", "role")
+    p1 = {**p1, **{k[3:]: v for k, v in seg.items()
+                   if k.startswith("p1_") and k[3:] in _P_KEYS}}
     scene = project.scene(seg.get("scene"), where)
+    scene = {**scene, **{k[6:]: v for k, v in seg.items()
+                         if k.startswith("scene_") and k[6:] in ("desc", "anchor", "extra", "retention")}}
     voice_key = seg.get("voice", seg.get("p1"))
     voice = project.char(voice_key, where)
     if not voice.get("voice"):
@@ -132,8 +139,10 @@ def render_prompt(project: Project, seg: dict):
         "scene_desc": scene["desc"],
         "scene_anchor": scene["anchor"],
         "scene_extra": scene.get("extra", ""),
-        "scene_retention": seg.get("scene_retention", scene["retention"]),
+        "scene_retention": scene["retention"],
         "p1_role": p1.get("role", f"{p1['gender']}角色"),
+        "drift_clause": seg.get("drift_clause", "全片不得漂移。"),
+        "audio_line": "",
         "voice_desc": voice["voice_desc"],
         "duration": seg.get("duration", defaults["duration"]),
         "style_qualifier": project.cfg["style_qualifier"],
@@ -143,11 +152,14 @@ def render_prompt(project: Project, seg: dict):
         "shots": format_shots(seg["shots"]),
         "soundscape": seg["soundscape"],
         "music": seg["music"],
+        "style_retention": seg.get("style_retention", project.cfg["style"]["retention"]),
     }
 
     p2 = None
     if "p2" in seg:
         p2 = project.char(seg["p2"], where)
+        p2 = {**p2, **{k[3:]: v for k, v in seg.items()
+                       if k.startswith("p2_") and k[3:] in _P_KEYS}}
         ctx["p2_gender"] = p2["gender"]
         ctx["p2_identity"] = p2["identity"]
         ctx["p2_retention"] = p2["retention"]
@@ -157,8 +169,14 @@ def render_prompt(project: Project, seg: dict):
     else:
         mode = "single"
 
+    if voice.get("voice") and seg.get(
+            "voice_audio", project.cfg.get("voice_audio_default", True)):
+        vs = ctx.get("voice_subject", "1")
+        ctx["audio_line"] = f"<Audio 1> 为 <Subject {vs}>（S{vs}）的音色参考：{voice['voice_desc']}。"
+
     try:
         prompt = project.templates[mode].format(**ctx)
+        prompt = re.sub(r"\n{3,}", "\n\n", prompt).rstrip("\n")  # 压缩空占位行、去尾部换行
     except KeyError as e:
         die(f"{mode} 模板占位符缺少数据：{e}")
     return prompt, p1, p2, scene, voice
@@ -532,6 +550,7 @@ def main():
     p.add_argument("--continue-on-error", action="store_true", help="失败/超时后继续下一段")
     p.add_argument("--task-timeout", type=int, default=900, help="单任务轮询超时秒数，默认 900")
     p.add_argument("--retry-wait", type=int, default=30, help="并发占用重试间隔秒数，默认 30")
+    p.add_argument("--max-retries", type=int, default=20, help="并发占用最大重试次数，默认 20")
     p.add_argument("--save-dir", help="成片下载目录（缺省 projects/<项目>/output/）")
 
     args = ap.parse_args()
@@ -547,7 +566,7 @@ def main():
         cmd_submit(project_dir, args.ep, args.seg, args.wait)
     elif args.cmd == "batch":
         cmd_batch(project_dir, args.ep, args.seg, args.continue_on_error,
-                  args.task_timeout, args.retry_wait, args.save_dir)
+                  args.task_timeout, args.retry_wait, args.max_retries, args.save_dir)
 
 
 if __name__ == "__main__":

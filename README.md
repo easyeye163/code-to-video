@@ -109,13 +109,21 @@ python scripts/minio_sync.py check
 
 | 文件 | 作用 |
 |---|---|
-| `project.json` | 项目配置：引擎参数（AppID/画幅/时长）、角色库（形象/三视图/音色/不变量）、场景库（参照图/锚点/不变量）、风格 |
-| `prompt_template_single.txt` | 6段式模板·单角色+场景（Picture 2=场景） |
-| `prompt_template_dual.txt` | 6段式模板·双角色+场景（Picture 2=第二角色，Picture 3=场景） |
+| `project.json` | 项目配置：引擎参数（AppID/画幅/双角色节点布局）、角色库（形象/三视图/音色/不变量）、场景库（参照图/锚点/仙侠化元素/不变量）、风格 |
+| `prompt_template_single.txt` | 6段式模板·单角色+场景 |
+| `prompt_template_dual.txt` | 6段式模板·双角色（节点分配由 `engine.dual_layout` 决定） |
 | `storyboards/epN.json` | 分集分镜：角色/场景/音色/时长/镜头/台词/声景/配乐 |
 | `output/` | 生成的 payload（已 gitignore） |
 
-嵩口为第一个项目实例：6 角色 / 8 场景 / ep7 全集 4 段分镜。
+**三个项目实例**：
+
+| 项目 | 定位 | 关键差异配置 |
+|---|---|---|
+| `projects/songkou` | 写实真实版 · 嵩口20集文化宣传短剧 | 双角色布局：P2=第二角色/P3=场景；提示词含 Audio 音色行 |
+| `projects/yaolu` | 3D动漫版 · 镇妖录12集仙侠 | 双角色布局：P2=场景/P3=第二角色（`scene_at_166`）；场景带"仙侠化元素"；默认无 Audio 行（`voice_audio_default: false`）；角色叙述序 P1→P3→P2 |
+| `projects/mv` | 古镇 MV（规划中骨架） | 复用写实资产；分镜待音乐创意确定后编写 |
+
+**分段级覆盖**：分镜中可用 `p1_identity` / `p2_identity` / `p1_retention` / `scene_retention` / `style_retention` / `summary` / `drift_clause` / `voice_audio` 等字段覆盖项目默认——同一段戏用简装造型、某段关闭音频行等需求均可在分镜内表达，不动项目配置。
 
 ### 使用
 
@@ -129,7 +137,7 @@ python pipeline.py batch   projects/songkou --ep 7 [--continue-on-error]  # 串�
 - 资产（角色图/场景图/音色）在配置中只写仓库相对路径，由资源清单自动解析为 **MinIO URL**
 - 分镜级覆盖：如 `"scene_retention"` 可按段定制不变量（ep7 seg4 的"夕阳金光"即用此实现）
 - **并发处理（重要）**：RunningHub 并发上限 1，`batch` 串行执行——提交撞 421 自动等待重试（默认 30s×20 次），一段完成**自动提交下一段**；每段成片自动下载到 `output/`（或 `--save-dir` 指定目录），COS 链接 24h 失效的问题一并解决；状态文件 `output/ep<N>_batch_state.json` 支持中断续跑（已成功且成片在手的段自动跳过）
-- **验证结果**：ep7 seg2-4 自动生成的提示词与手工版**逐字一致**；seg1 仅 Shot 分行的规范化差异
+- **验证结果**：songkou ep7 三段与手工版**逐字一致**（seg1 仅 Shot 分行规范化）；yaolu 5 个技能 demo **5/5 全部逐字一致**（含双角色节点布局对调、仙侠化元素、无音频行等全部项目级差异）
 
 ### 新建一个短剧项目
 
