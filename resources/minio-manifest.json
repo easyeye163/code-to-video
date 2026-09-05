@@ -1,11 +1,11 @@
 {
-  "updated": "2026-09-05T11:56:51+08:00",
+  "updated": "2026-09-05T19:46:47+08:00",
   "endpoint": "zhangshuxia.ltd:9000",
   "bucket": "code-to-video",
   "prefix": "code-to-video",
   "public_base_url": "http://zhangshuxia.ltd:9000",
-  "total": 187,
-  "total_size": 648934449,
+  "total": 188,
+  "total_size": 674887217,
   "resources": [
     {
       "path": "audio/01_温暖治愈男生.flac",
@@ -971,9 +971,17 @@
       "path": "videos/promo/congbing_ep1_final.mp4",
       "type": "video",
       "name": "congbing_ep1_final.mp4",
-      "size": 25409346,
+      "size": 26327381,
       "object_key": "code-to-video/videos/promo/congbing_ep1_final.mp4",
       "url": "http://zhangshuxia.ltd:9000/code-to-video/code-to-video/videos/promo/congbing_ep1_final.mp4"
+    },
+    {
+      "path": "videos/promo/yaolu_congbing_ep1_final.mp4",
+      "type": "video",
+      "name": "yaolu_congbing_ep1_final.mp4",
+      "size": 25034733,
+      "object_key": "code-to-video/videos/promo/yaolu_congbing_ep1_final.mp4",
+      "url": "http://zhangshuxia.ltd:9000/code-to-video/code-to-video/videos/promo/yaolu_congbing_ep1_final.mp4"
     },
     {
       "path": "videos/songkou-vlog/万安堡.mp4",
