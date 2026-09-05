@@ -34,6 +34,7 @@ code-to-video 制作流水线
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import re
@@ -483,6 +484,16 @@ def cmd_batch(project_dir: Path, ep: int, seg=None, continue_on_error=False,
     out_dir.mkdir(parents=True, exist_ok=True)
     state_path = out_dir / f"ep{ep}_batch_state.json"
     state = load_json(state_path) if state_path.exists() else {}
+
+    # 内容指纹：分镜变更后自动作废旧进度，避免把旧内容的断点当成新内容的
+    sb_hash = hashlib.md5(json.dumps(sb, ensure_ascii=False, sort_keys=True)
+                          .encode("utf-8")).hexdigest()[:12]
+    if state.get("storyboard_hash") != sb_hash:
+        old_h = state.get("storyboard_hash", "无记录")
+        print(f"⚠ 分镜内容已变更（{old_h} → {sb_hash}），作废旧进度重新开始")
+        state = {}
+    state["storyboard_hash"] = sb_hash
+
     save_dir = Path(save_dir) if save_dir else out_dir
 
     def save_state():
