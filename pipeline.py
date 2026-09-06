@@ -273,9 +273,12 @@ def _check_dialogue_budget(warnings, seg, tag):
     total_chars = sum(len(re.sub(r"[，。！？…、；：\"''\s—-]", "", s.get("dialogue", "")))
                       for s in seg.get("shots", []))
     dur = float(seg.get("duration", 15))
-    if 0 < total_chars < dur * SPEED * 0.28:
+    if seg.get("dialogue_style"):
+        return  # 风格段（montage/battle/formula）台词碎片化是有意设计，豁免"过少"校验
+    if total_chars < dur * SPEED * 0.55:
         warnings.append(
-            f"{tag}: 全段台词仅 {total_chars} 字 / {dur:.0f}s —— 台词过少，模型可能填充或重复念白")
+            f"{tag}: 全段台词 {total_chars} 字 / {dur:.0f}s（要求≥{dur * SPEED * 0.55:.0f} 字）—— "
+            f"台词不足，模型会用杂音/幻觉填充，请加长人物台词")
     if seg_lines > 3:
         warnings.append(f"{tag}: 单段 {seg_lines} 句台词偏密，多人对话易串味，建议拆段")
 
@@ -485,18 +488,25 @@ def cmd_batch(project_dir: Path, ep: int, seg=None, continue_on_error=False,
     state_path = out_dir / f"ep{ep}_batch_state.json"
     state = load_json(state_path) if state_path.exists() else {}
 
-    # 内容指纹：分镜变更后自动作废旧进度，避免把旧内容的断点当成新内容的
-    sb_hash = hashlib.md5(json.dumps(sb, ensure_ascii=False, sort_keys=True)
-                          .encode("utf-8")).hexdigest()[:12]
-    if state.get("storyboard_hash") != sb_hash:
-        old_h = state.get("storyboard_hash", "无记录")
-        print(f"⚠ 分镜内容已变更（{old_h} → {sb_hash}），作废旧进度重新开始")
-        state = {}
-    state["storyboard_hash"] = sb_hash
+
+    # 段级指纹：只重跑内容变更的段
+    for _s in segs:
+        _k = str(_s["seg"])
+        _h = hashlib.md5(json.dumps(_s, ensure_ascii=False, sort_keys=True)
+                         .encode("utf-8")).hexdigest()[:10]
+        if _k in state and state[_k].get("seg_hash") not in (None, _h):
+            print(f"⚠ ep{ep} seg{_s['seg']} 分镜已变更，重新生成该段")
+            state.pop(_k)
 
     save_dir = Path(save_dir) if save_dir else out_dir
 
     def save_state():
+        for _k, _v in state.items():
+            if _k.isdigit() and isinstance(_v, dict) and "seg_hash" not in _v:
+                _s = next((x for x in segs if str(x["seg"]) == _k), None)
+                if _s:
+                    _v["seg_hash"] = hashlib.md5(json.dumps(_s, ensure_ascii=False, sort_keys=True)
+                                                 .encode("utf-8")).hexdigest()[:10]
         state_path.write_text(json.dumps(state, ensure_ascii=False, indent=2), encoding="utf-8")
 
     def files_ok(st):
