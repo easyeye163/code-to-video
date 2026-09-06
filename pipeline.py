@@ -1174,6 +1174,15 @@ def _norm_cn(s: str):
     return re.sub(r"[，。！？…、；：\s—.?!-]", "", s)
 
 
+def _py(s: str):
+    """拼音归一：消除 ASR 同音字转写噪音（嵩口/松口、大阵/大镇）。"""
+    try:
+        from pypinyin import lazy_pinyin
+        return " ".join(lazy_pinyin(_norm_cn(s)))
+    except ImportError:
+        return _norm_cn(s)
+
+
 def cmd_verify(project_dir: Path, ep: int, seg: int, threshold=60.0):
     """台词保真验收：段视频音频 → ASR 回读 → 与剧本台词比对相似度。"""
     from difflib import SequenceMatcher
@@ -1242,14 +1251,14 @@ def cmd_verify(project_dir: Path, ep: int, seg: int, threshold=60.0):
     import urllib.request as _u
     with _u.urlopen(srt_url, timeout=60) as r:
         srt_text = _srt_to_text(r.read().decode("utf-8", "replace"))
-    heard = _norm_cn(srt_text)
+    heard = _py(srt_text)
     print(f"\n台词保真报告  ep{ep} seg{seg}（ASR 消耗 {coins} 币）")
     print(f"  剧本台词 {len(expected)} 句 | ASR 回读 {len(heard)} 字")
     print(f"  ASR 原文：{srt_text[:120]}")
     ok = 0
     for dlg in expected:
-        d = _norm_cn(dlg)
-        ratio = SequenceMatcher(None, d, heard).find_longest_match(0, len(d), 0, len(heard))
+        d = _py(dlg)
+        ratio = SequenceMatcher(None, d, heard, autojunk=False).find_longest_match(0, len(d), 0, len(heard))
         cov = (ratio.size / len(d) * 100) if d else 100.0
         mark = "✓" if cov >= threshold else "✗"
         if cov >= threshold:
