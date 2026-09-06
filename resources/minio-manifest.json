@@ -1,11 +1,11 @@
 {
-  "updated": "2026-09-06T08:49:35+08:00",
+  "updated": "2026-09-06T10:30:04+08:00",
   "endpoint": "zhangshuxia.ltd:9000",
   "bucket": "code-to-video",
   "prefix": "code-to-video",
   "public_base_url": "http://zhangshuxia.ltd:9000",
-  "total": 193,
-  "total_size": 751193680,
+  "total": 210,
+  "total_size": 882572831,
   "resources": [
     {
       "path": "audio/01_温暖治愈男生.flac",
@@ -1547,9 +1547,145 @@
       "path": "videos/yaolu_s1/ep03_final.mp4",
       "type": "video",
       "name": "ep03_final.mp4",
-      "size": 24988772,
+      "size": 23340041,
       "object_key": "code-to-video/videos/yaolu_s1/ep03_final.mp4",
       "url": "http://zhangshuxia.ltd:9000/code-to-video/code-to-video/videos/yaolu_s1/ep03_final.mp4"
+    },
+    {
+      "path": "videos/yaolu_s1/no-sub/ep2_nosub.mp4",
+      "type": "video",
+      "name": "ep2_nosub.mp4",
+      "size": 23349902,
+      "object_key": "code-to-video/videos/yaolu_s1/no-sub/ep2_nosub.mp4",
+      "url": "http://zhangshuxia.ltd:9000/code-to-video/code-to-video/videos/yaolu_s1/no-sub/ep2_nosub.mp4"
+    },
+    {
+      "path": "videos/yaolu_s1/no-sub/ep3_nosub.mp4",
+      "type": "video",
+      "name": "ep3_nosub.mp4",
+      "size": 23499727,
+      "object_key": "code-to-video/videos/yaolu_s1/no-sub/ep3_nosub.mp4",
+      "url": "http://zhangshuxia.ltd:9000/code-to-video/code-to-video/videos/yaolu_s1/no-sub/ep3_nosub.mp4"
+    },
+    {
+      "path": "videos/yaolu_s1/raw/ep1_seg1.mp4",
+      "type": "video",
+      "name": "ep1_seg1.mp4",
+      "size": 9734669,
+      "object_key": "code-to-video/videos/yaolu_s1/raw/ep1_seg1.mp4",
+      "url": "http://zhangshuxia.ltd:9000/code-to-video/code-to-video/videos/yaolu_s1/raw/ep1_seg1.mp4"
+    },
+    {
+      "path": "videos/yaolu_s1/raw/ep1_seg2.mp4",
+      "type": "video",
+      "name": "ep1_seg2.mp4",
+      "size": 6477901,
+      "object_key": "code-to-video/videos/yaolu_s1/raw/ep1_seg2.mp4",
+      "url": "http://zhangshuxia.ltd:9000/code-to-video/code-to-video/videos/yaolu_s1/raw/ep1_seg2.mp4"
+    },
+    {
+      "path": "videos/yaolu_s1/raw/ep1_seg3.mp4",
+      "type": "video",
+      "name": "ep1_seg3.mp4",
+      "size": 8200249,
+      "object_key": "code-to-video/videos/yaolu_s1/raw/ep1_seg3.mp4",
+      "url": "http://zhangshuxia.ltd:9000/code-to-video/code-to-video/videos/yaolu_s1/raw/ep1_seg3.mp4"
+    },
+    {
+      "path": "videos/yaolu_s1/raw/ep1_seg4.mp4",
+      "type": "video",
+      "name": "ep1_seg4.mp4",
+      "size": 7520231,
+      "object_key": "code-to-video/videos/yaolu_s1/raw/ep1_seg4.mp4",
+      "url": "http://zhangshuxia.ltd:9000/code-to-video/code-to-video/videos/yaolu_s1/raw/ep1_seg4.mp4"
+    },
+    {
+      "path": "videos/yaolu_s1/raw/ep2_seg1.mp4",
+      "type": "video",
+      "name": "ep2_seg1.mp4",
+      "size": 5419125,
+      "object_key": "code-to-video/videos/yaolu_s1/raw/ep2_seg1.mp4",
+      "url": "http://zhangshuxia.ltd:9000/code-to-video/code-to-video/videos/yaolu_s1/raw/ep2_seg1.mp4"
+    },
+    {
+      "path": "videos/yaolu_s1/raw/ep2_seg2.mp4",
+      "type": "video",
+      "name": "ep2_seg2.mp4",
+      "size": 8813618,
+      "object_key": "code-to-video/videos/yaolu_s1/raw/ep2_seg2.mp4",
+      "url": "http://zhangshuxia.ltd:9000/code-to-video/code-to-video/videos/yaolu_s1/raw/ep2_seg2.mp4"
+    },
+    {
+      "path": "videos/yaolu_s1/raw/ep2_seg3.mp4",
+      "type": "video",
+      "name": "ep2_seg3.mp4",
+      "size": 6383119,
+      "object_key": "code-to-video/videos/yaolu_s1/raw/ep2_seg3.mp4",
+      "url": "http://zhangshuxia.ltd:9000/code-to-video/code-to-video/videos/yaolu_s1/raw/ep2_seg3.mp4"
+    },
+    {
+      "path": "videos/yaolu_s1/raw/ep2_seg4.mp4",
+      "type": "video",
+      "name": "ep2_seg4.mp4",
+      "size": 6945678,
+      "object_key": "code-to-video/videos/yaolu_s1/raw/ep2_seg4.mp4",
+      "url": "http://zhangshuxia.ltd:9000/code-to-video/code-to-video/videos/yaolu_s1/raw/ep2_seg4.mp4"
+    },
+    {
+      "path": "videos/yaolu_s1/raw/ep3_seg1.mp4",
+      "type": "video",
+      "name": "ep3_seg1.mp4",
+      "size": 6789041,
+      "object_key": "code-to-video/videos/yaolu_s1/raw/ep3_seg1.mp4",
+      "url": "http://zhangshuxia.ltd:9000/code-to-video/code-to-video/videos/yaolu_s1/raw/ep3_seg1.mp4"
+    },
+    {
+      "path": "videos/yaolu_s1/raw/ep3_seg2.mp4",
+      "type": "video",
+      "name": "ep3_seg2.mp4",
+      "size": 8142835,
+      "object_key": "code-to-video/videos/yaolu_s1/raw/ep3_seg2.mp4",
+      "url": "http://zhangshuxia.ltd:9000/code-to-video/code-to-video/videos/yaolu_s1/raw/ep3_seg2.mp4"
+    },
+    {
+      "path": "videos/yaolu_s1/raw/ep3_seg3.mp4",
+      "type": "video",
+      "name": "ep3_seg3.mp4",
+      "size": 4805752,
+      "object_key": "code-to-video/videos/yaolu_s1/raw/ep3_seg3.mp4",
+      "url": "http://zhangshuxia.ltd:9000/code-to-video/code-to-video/videos/yaolu_s1/raw/ep3_seg3.mp4"
+    },
+    {
+      "path": "videos/yaolu_s1/raw/ep3_seg4.mp4",
+      "type": "video",
+      "name": "ep3_seg4.mp4",
+      "size": 6944211,
+      "object_key": "code-to-video/videos/yaolu_s1/raw/ep3_seg4.mp4",
+      "url": "http://zhangshuxia.ltd:9000/code-to-video/code-to-video/videos/yaolu_s1/raw/ep3_seg4.mp4"
+    },
+    {
+      "path": "videos/yaolu_s1/srt/ep1.zh.srt",
+      "type": "application",
+      "name": "ep1.zh.srt",
+      "size": 370,
+      "object_key": "code-to-video/videos/yaolu_s1/srt/ep1.zh.srt",
+      "url": "http://zhangshuxia.ltd:9000/code-to-video/code-to-video/videos/yaolu_s1/srt/ep1.zh.srt"
+    },
+    {
+      "path": "videos/yaolu_s1/srt/ep2.zh.srt",
+      "type": "application",
+      "name": "ep2.zh.srt",
+      "size": 513,
+      "object_key": "code-to-video/videos/yaolu_s1/srt/ep2.zh.srt",
+      "url": "http://zhangshuxia.ltd:9000/code-to-video/code-to-video/videos/yaolu_s1/srt/ep2.zh.srt"
+    },
+    {
+      "path": "videos/yaolu_s1/srt/ep3.zh.srt",
+      "type": "application",
+      "name": "ep3.zh.srt",
+      "size": 941,
+      "object_key": "code-to-video/videos/yaolu_s1/srt/ep3.zh.srt",
+      "url": "http://zhangshuxia.ltd:9000/code-to-video/code-to-video/videos/yaolu_s1/srt/ep3.zh.srt"
     }
   ]
 }
