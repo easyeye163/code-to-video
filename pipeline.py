@@ -1263,6 +1263,89 @@ def cmd_verify(project_dir: Path, ep: int, seg: int, threshold=60.0):
 
 
 
+
+# ==================== backup：出海素材包（无字幕段+SRT+无字幕成片） ====================
+
+def cmd_backup(project_dir: Path, ep: int = None):
+    """把段视频（无字幕）、SRT、无字幕成片备份到 MinIO——海外发行字幕重制的素材底座。
+
+    路径规范：videos/<项目>_s1/raw|srt|no-sub/…
+    """
+    project = Project(project_dir)
+    proj_name = project.cfg["name"]
+    sb_dir = project_dir / "storyboards"
+    eps = ([ep] if ep else
+           sorted(int(f.stem[2:]) for f in sb_dir.glob("ep*.json")
+                  if (project_dir / "output" / f"ep{f.stem[2:]}_seg1.mp4").exists()))
+    if not eps:
+        die("没有可备份的集（output/ 下无段视频）")
+
+    cfg = json.load(open(ROOT / "scripts" / "minio_config.json", encoding="utf-8"))
+    from minio import Minio
+    c = _minio_client_for_upload(cfg)
+    mpath = ROOT / "resources" / "minio-manifest.json"
+    m = json.load(open(mpath, encoding="utf-8"))
+    from urllib.parse import quote as _q
+    from datetime import datetime as _dt
+
+    def register(rel, local, ctype):
+        key = f"{cfg['prefix']}/{rel}"
+        dst = Path(cfg.get("fs_root", "F:/buket")) / cfg["bucket"] / key
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(local, dst)
+        entry = {"path": rel, "type": ctype.split("/")[0], "name": Path(rel).name,
+                 "size": local.stat().st_size, "object_key": key,
+                 "url": f"{cfg['public_base_url']}/{cfg['bucket']}/{_q(key, safe='/')}"}
+        m["resources"] = [e for e in m["resources"] if e["path"] != rel] + [entry]
+
+    ffmpeg = shutil.which("ffmpeg") or "ffmpeg"
+    out_dir = project_dir / "output"
+    n = 0
+    for e in eps:
+        clips = []
+        for s in sorted(x["seg"] for x in project.storyboard(e)["segments"]):
+            clip = find_clip(project, e, s)
+            if clip:
+                clips.append(clip)
+                rel = f"videos/{proj_name}_s1/raw/ep{e}_seg{s}.mp4"
+                register(rel, clip, "video/mp4")
+                n += 1
+        srt = out_dir / f"ep{e}.srt"
+        if srt.exists():
+            register(f"videos/{proj_name}_s1/srt/ep{e}.zh.srt", srt, "application/x-subrip")
+            n += 1
+        # 无字幕成片：concat 段视频（同源参数直拷，失败转码）
+        if clips:
+            nosub = out_dir / f"ep{e}_nosub.mp4"
+            listf = out_dir / f"_concat_ep{e}.txt"
+            listf.write_text("".join(f"file '{c.resolve()}'\n" for c in clips), encoding="utf-8")
+            r = _sp_run_concat(ffmpeg, listf, nosub, out_dir)
+            if r == 0:
+                register(f"videos/{proj_name}_s1/no-sub/ep{e}_nosub.mp4", nosub, "video/mp4")
+                n += 1
+            else:
+                print(f"  ⚠ ep{e} 无字幕成片直拷失败（段参数不一致），跳过（段视频已备齐）")
+        print(f"  ep{e}: 段 {len(clips)} + SRT + 无字幕成片")
+
+    m["total"] = len(m["resources"])
+    m["total_size"] = sum(x["size"] for x in m["resources"])
+    m["updated"] = _dt.now().astimezone().isoformat(timespec="seconds")
+    json.dump(m, open(mpath, "w", encoding="utf-8"), ensure_ascii=False, indent=2)
+    bdir = Path(cfg.get("fs_root", "F:/buket")) / cfg["bucket"] / "resources"
+    bdir.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(mpath, bdir / "minio-manifest.json")
+    print(f"✓ 出海素材包备份完成：{n} 个对象入 MinIO（videos/{proj_name}_s1/）")
+
+
+def _sp_run_concat(ffmpeg, listf, out, cwd_dir):
+    import subprocess
+    r = subprocess.run([ffmpeg, "-y", "-f", "concat", "-safe", "0", "-i", str(listf),
+                        "-c", "copy", "-movflags", "+faststart", str(out)],
+                       cwd=str(cwd_dir), capture_output=True)
+    return r.returncode
+
+
+
 def main():
     ap = argparse.ArgumentParser(
         description="code-to-video 制作流水线：分镜 + 项目配置 + 提示词模板 → RunningHub payload")
@@ -1327,6 +1410,10 @@ def main():
     p.add_argument("--seg", type=int, required=True, help="段号")
     p.add_argument("--threshold", type=float, default=60.0, help="单句字符覆盖率阈值%%，默认 60")
 
+    p = sub.add_parser("backup", help="出海素材包备份：无字幕段视频+SRT+无字幕成片 → MinIO")
+    p.add_argument("project", help="项目目录")
+    p.add_argument("--ep", type=int, help="只备份指定集（缺省备份全部已生成集）")
+
     args = ap.parse_args()
     project_dir = Path(args.project)
     if args.cmd != "init-project" and not project_dir.exists():
@@ -1352,6 +1439,8 @@ def main():
                   args.ref_url, args.dry_run)
     elif args.cmd == "verify":
         cmd_verify(project_dir, args.ep, args.seg, args.threshold)
+    elif args.cmd == "backup":
+        cmd_backup(project_dir, args.ep)
 
 
 if __name__ == "__main__":
