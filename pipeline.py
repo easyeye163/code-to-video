@@ -736,7 +736,7 @@ def gen_srt(project: Project, segs, durations, out_path: Path, initial_offset=0.
     idx, lines, offset = 0, [], initial_offset
     for seg, dur in zip(segs, durations):
         for shot in seg.get("shots", []):
-            m = re.match(r"(\d+)s-(\d+)s", str(shot.get("time", "")))
+            m = re.match(r"(\d+(?:\.\d+)?)s-(\d+(?:\.\d+)?)s", str(shot.get("time", "")))
             dlg = shot.get("dialogue")
             if not m or not dlg:
                 continue
