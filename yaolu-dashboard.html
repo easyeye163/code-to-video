@@ -60,6 +60,9 @@
   .video{background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:10px;overflow:hidden}
   .video .tt{font-size:13px;font-weight:600;padding:8px 10px 0;color:var(--ink)}
   .video video{width:100%;display:block;aspect-ratio:16/9;background:#000}
+  .video.pending{opacity:.45;position:relative}
+  .video.pending .pending-label{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:14px;font-weight:700;color:var(--gold);background:rgba(15,10,30,.8);padding:4px 14px;border-radius:8px;pointer-events:none;z-index:2}
+  .video.pending video{filter:blur(3px)}
 
   /* 音频 */
   .audios{display:flex;flex-direction:column;gap:8px}
@@ -86,9 +89,9 @@
 
   <header>
     <h1>嵩口镇妖录
-      <small>仙侠衍生IP · 12集AI玄幻短剧 · 素材与进度看板</small>
+      <small>仙侠衍生IP · 12集AI玄幻短剧 · 素材与进度看板 · EP1试片已出</small>
     </h1>
-    <div class="badge">数据截至 2026-08-31</div>
+    <div class="badge">数据截至 2026-09-07</div>
   </header>
 
   <!-- 进度总览 -->
@@ -103,14 +106,14 @@
       <div class="ov"><div class="k">爆裂技能demo</div><div class="v">5 / 5</div><div class="bar"><i style="width:100%"></i></div></div>
       <div class="ov"><div class="k">剧本大纲</div><div class="v">12 / 12</div><div class="bar green"><i style="width:100%"></i></div></div>
     </div>
-    <div class="hint">素材准备阶段 100% 完成；正片制作待启动（0/48段）。</div>
+    <div class="hint">EP1试片已完成；正片制作待启动（0/48段）。</div>
   </section>
 
   <!-- 分集矩阵 -->
   <section>
     <div class="s-title"><span class="dot d-cyan"></span>分集实施矩阵（12集）</div>
     <div class="eps">
-      <div class="ep"><span class="no">EP1</span><span class="nm">觉醒·鹤形路</span><span class="st wait">未开始</span></div>
+      <div class="ep"><span class="no">EP1</span><span class="nm">觉醒·鹤形路</span><span class="st ready">试片已出</span></div>
       <div class="ep"><span class="no">EP2</span><span class="nm">传人·龙口祖厝</span><span class="st wait">未开始</span></div>
       <div class="ep"><span class="no">EP3</span><span class="nm">聚灵·用坦厝天井</span><span class="st wait">未开始</span></div>
       <div class="ep"><span class="no">EP4</span><span class="nm">观星·德星楼</span><span class="st wait">未开始</span></div>
@@ -243,8 +246,10 @@
         <video src="https://cdn.jsdelivr.net/gh/easyeye163/h3-video-coding@main/videos/songkou_xianxia/demo_10s_zhang_director.mp4" type="video/mp4" controls preload="metadata" playsinline></video></div>
       <div class="video"><div class="tt">穷奇 · 万安堡 — 封印中红色巨眼亮起</div>
         <video src="https://cdn.jsdelivr.net/gh/easyeye163/h3-video-coding@main/videos/songkou_xianxia/demo_10s_qiongqi.mp4" type="video/mp4" controls preload="metadata" playsinline></video></div>
+      <div class="video pending"><div class="tt">男主 · 鹤形路 — 仙缘初醒</div><div class="pending-label">待制作</div></div>
+      <div class="video pending"><div class="tt">林小溪 · 鹤形路 — 灵气感知</div><div class="pending-label">待制作</div></div>
     </div>
-    <div class="hint">4个角色介绍demo已完成（陈阿公/小糯米/张导演/穷奇），主角和林小溪介绍demo另存。</div>
+    <div class="hint">4个角色介绍demo已完成（陈阿公/小糯米/张导演/穷奇），2个待制作（男主/林小溪）。</div>
   </section>
 
   <!-- 爆裂酷炫技能demo -->
@@ -265,6 +270,40 @@
     <div class="hint">5个15秒爆裂酷炫技能demo全部完成（图生图版主角 + 图生图版场景，总消耗 361 coins）。</div>
   </section>
 
+  <!-- seedance打斗demo -->
+  <section>
+    <div class="s-title"><span class="dot d-red"></span>seedance打斗demo（15秒/个）</div>
+    <div class="videos">
+      <div class="video"><div class="tt">完整版打斗·万安堡废墟 — 男主×穷奇·全程追逐战</div>
+        <video src="https://cdn.jsdelivr.net/gh/easyeye163/h3-video-coding@main/videos/songkou_xianxia/seedance_fight_p1_wananbao.mp4" type="video/mp4" controls preload="metadata" playsinline></video></div>
+      <div class="video"><div class="tt">预告片混剪·多场景快切 — 高燃节奏·预告可用片段</div>
+        <video src="https://cdn.jsdelivr.net/gh/easyeye163/h3-video-coding@main/videos/songkou_xianxia/seedance_test_duo_fight_wananbao.mp4" type="video/mp4" controls preload="metadata" playsinline></video></div>
+      <div class="video"><div class="tt">P2结尾高潮·封印对决 — 万安堡核心·封灵时刻</div>
+        <video src="https://cdn.jsdelivr.net/gh/easyeye163/h3-video-coding@main/videos/songkou_xianxia/seedance_fight_p2_wananbao.mp4" type="video/mp4" controls preload="metadata" playsinline></video></div>
+    </div>
+    <div class="hint">3个seedance打斗demo已完成（完整版/预告片混剪/P2高潮）。</div>
+  </section>
+
+  <!-- 林小溪演唱demo -->
+  <section>
+    <div class="s-title"><span class="dot d-cyan"></span>林小溪演唱demo（15秒/个）</div>
+    <div class="videos">
+      <div class="video"><div class="tt">林小溪独唱·花点段落 — 女声主歌·灵气觉醒</div>
+        <video src="https://cdn.jsdelivr.net/gh/easyeye163/h3-video-coding@main/videos/songkou_xianxia/linxiaoxi_singing_huadian_15s.mp4" type="video/mp4" controls preload="metadata" playsinline></video></div>
+      <div class="video"><div class="tt">万安堡×林小溪·花点段落 — 双角色对唱·仙妖交织</div>
+        <video src="https://cdn.jsdelivr.net/gh/easyeye163/h3-video-coding@main/videos/songkou_xianxia/linxiaoxi_female_singing_huadian_15s.mp4" type="video/mp4" controls preload="metadata" playsinline></video></div>
+      <div class="video"><div class="tt">万安堡×林小溪·主歌 — Verse·古镇初遇</div>
+        <video src="https://cdn.jsdelivr.net/gh/easyeye163/h3-video-coding@main/videos/songkou_xianxia/wananbao_linxiaoxi_verse1_15s.mp4" type="video/mp4" controls preload="metadata" playsinline></video></div>
+      <div class="video"><div class="tt">万安堡×林小溪·预副歌 — PreChorus·灵力涌动</div>
+        <video src="https://cdn.jsdelivr.net/gh/easyeye163/h3-video-coding@main/videos/songkou_xianxia/wananbao_linxiaoxi_prechorus_15s.mp4" type="video/mp4" controls preload="metadata" playsinline></video></div>
+      <div class="video"><div class="tt">万安堡×林小溪·副歌 — Chorus·封印爆发</div>
+        <video src="https://cdn.jsdelivr.net/gh/easyeye163/h3-video-coding@main/videos/songkou_xianxia/wananbao_linxiaoxi_chorus_15s.mp4" type="video/mp4" controls preload="metadata" playsinline></video></div>
+      <div class="video"><div class="tt">万安堡×林小溪·终段副歌 — Final Chorus·全阵齐鸣</div>
+        <video src="https://cdn.jsdelivr.net/gh/easyeye163/h3-video-coding@main/videos/songkou_xianxia/wananbao_linxiaoxi_final_chorus_15s.mp4" type="video/mp4" controls preload="metadata" playsinline></video></div>
+    </div>
+    <div class="hint">6个演唱demo已完成（林小溪独唱×2 + 万安堡×林小溪对唱×4：主歌/预副歌/副歌/终段副歌）。</div>
+  </section>
+
   <!-- 里程碑 -->
   <section>
     <div class="s-title"><span class="dot d-purple"></span>项目里程碑</div>
@@ -275,10 +314,13 @@
       <div class="mil"><span class="tag rec">已完成</span><span>唯美中国风概念图：8张国风插画（月夜/烟雨/禅意/夕照/星夜/晨光/渔舟/听雨）</span></div>
       <div class="mil"><span class="tag rec">已完成</span><span>唯美中国风动态视频：4个10秒（烟雨鹤形路/古榕听禅/月夜古码头/用坦厝听雨）</span></div>
       <div class="mil"><span class="tag rec">已完成</span><span>图生图版3D场景唯美视频：6个10秒（万安堡/鹤形路/德星楼/龙口祖厝/嵩口全景/古码头）</span></div>
-      <div class="mil"><span class="tag rec">已完成</span><span>角色介绍demo：陈阿公/小糯米/张导演/穷奇 4个10秒demo</span></div>
+      <div class="mil"><span class="tag rec">已完成</span><span>角色介绍demo：陈阿公/小糯米/张导演/穷奇 4个10秒demo + 男主/林小溪 2个待制作</span></div>
       <div class="mil"><span class="tag rec">已完成</span><span>鹤形路demo：10秒仙侠化场景测试</span></div>
       <div class="mil"><span class="tag rec">已完成</span><span>爆裂酷炫技能demo：5个15秒（御剑裂空/双剑合璧/仙鹤归元/水脉雷狱/七阵齐鸣）</span></div>
-      <div class="mil"><span class="tag ing">筹备中</span><span>正片制作：12集×4段×15秒，待启动</span></div>
+      <div class="mil"><span class="tag rec">已完成</span><span>EP1试片：觉醒·鹤形路 三段90秒成片（修炼觉醒/穷奇初醒/封灵仪式）</span></div>
+      <div class="mil"><span class="tag rec">已完成</span><span>seedance打斗demo：3个15秒（完整版/预告片混剪/P2高潮）</span></div>
+      <div class="mil"><span class="tag rec">已完成</span><span>林小溪演唱demo：6个15秒（独唱×2 + 万安堡对唱×4）</span></div>
+      <div class="mil"><span class="tag ing">筹备中</span><span>正片制作：12集×4段×15秒，EP1试片完成，正片待启动</span></div>
       <div class="mil"><span class="tag warn">待定</span><span>美食仙侠系列：葱饼/蛋燕/礼饼/九重粿 仙侠化演绎</span></div>
     </div>
   </section>
