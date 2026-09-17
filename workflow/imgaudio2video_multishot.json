@@ -1,0 +1,67 @@
+{
+  "nodeInfoList": [
+    {
+      "nodeId": "150",
+      "fieldName": "image",
+      "fieldValue": "bc8b9cfddcf36f1167c3205652d8db8a6f955a4ffe286244c1a77520313cda40.png",
+      "description": "参考图 <Picture 1>（角色 S1 锚点）：上传接口返回的 fileName，替换为你自己的"
+    },
+    {
+      "nodeId": "250",
+      "fieldName": "audio",
+      "fieldValue": "6135ce6d9cf7e62ba07612d65a5da687c155923b5cb16117833c45febad8f224.mp3",
+      "description": "音频输入 A（配音/演唱，上传接口返回的 fileName）"
+    },
+    {
+      "nodeId": "252",
+      "fieldName": "image",
+      "fieldValue": "example.png",
+      "description": "参考图占位（按需替换；本示例未使用真实图）"
+    },
+    {
+      "nodeId": "132",
+      "fieldName": "value",
+      "fieldValue": "15",
+      "description": "视频时长（秒），与提示词中的镜头时间轴保持一致"
+    },
+    {
+      "nodeId": "253",
+      "fieldName": "image",
+      "fieldValue": "5b4fd7b46529150a7d68b18ad81eae8044b0dd008c7e727309f1e9dcbd824013.png",
+      "description": "参考图 <Picture 2>（角色 S2 锚点）：上传接口返回的 fileName"
+    },
+    {
+      "nodeId": "232",
+      "fieldName": "value",
+      "fieldValue": "subject_definitions:\n<Picture 1> 严格负责马尔斯（S1）的身份与造型：马尔斯，16岁流亡王子，深蓝色短发，金色发冠，蓝色与金色王室铠甲配披风，年轻俊朗，眉宇坚毅温和，腰间佩剑。全片不得漂移。\n<Picture 2> 严格负责希达（S2）的身份与造型：希达，塔利斯王国公主，深蓝色长发，金色头冠，白色底金色纹饰铠甲，粉色披风，容貌秀丽，神情焦急。全片不得漂移。\n\nsummary:\n15秒火焰纹章·纹章之谜第一章游戏对话镜头：塔利斯城寨内，希达骑马赶到向马尔斯求救，马尔斯坚定回应决意进军。写实电影风格，近景对话为主。\n\nretention_analysis:\n<Picture 1>（角色锚点）：完全保留 - 马尔斯的深蓝短发、金冠、蓝金铠甲与披风全程一致。\n<Picture 2>（角色锚点）：完全保留 - 希达的深蓝长发、金冠、白底金纹铠甲与粉披风全程一致。\n\n详细描述：写实电影风格，中世纪城堡石墙与木梁的城寨内，晨光从窗格斜射入内，尘埃在光柱中浮动，画面暖而紧张。全程近景与中近景，不出现远景。\n[Shot 1]（0s-5s）中近景，希达（S2）快步走近马尔斯（S1），发丝微乱，神情焦急，双手交握。希达开口：(S2) 说：<d>[Chinese]马尔斯大人，加鲁达的海贼突袭了塔利斯城，父王被困，请救救他！</d>\n[Shot 2]（5s-10s）近景，马尔斯（S1）神色从惊讶转为坚定，微微点头，手按剑柄。马尔斯开口：(S1) 说：<d>[Chinese]放心，希达。阿利提亚的骑士不会输给海贼。</d>\n[Shot 3]（10s-15s）中近景，马尔斯向希达伸出手，目光坚定，希达眼神湿润抬头看他。马尔斯开口：(S1) 说：<d>[Chinese]走吧，一起去塔利斯城。</d>镜头缓缓推进至两人对视。\n\n全程保持角色关系：马尔斯始终位于画面左侧或中央偏左，希达位于右侧；希达的深蓝长发、粉披风，马尔斯的金冠蓝甲全程连续。绝对禁止字幕、画面文字、LOGO、水印。\n\noverall_soundscape:\n城堡内脚步回声、盔甲轻响、窗外隐约的海风与远处喊杀声。\n\nnon_diegetic_music:\n低沉弦乐与战鼓渐起，庄重紧迫，随马尔斯决意出征收束。",
+      "description": "提示词：6 段式 Full-Reference（双角色锚点 + 3 镜头对白，15s）"
+    },
+    {
+      "nodeId": "254",
+      "fieldName": "image",
+      "fieldValue": "example.png",
+      "description": "参考图占位（按需替换；本示例未使用真实图）"
+    },
+    {
+      "nodeId": "115",
+      "fieldName": "aspect_ratio",
+      "fieldData": "[\"COMBO\", {\"default\": \"1:1 (Square)\", \"options\": [\"1:1 (Square)\", \"2:3 (Portrait Photo)\", \"3:2 (Photo)\", \"3:4 (Portrait Standard)\", \"4:3 (Standard)\", \"9:16 (Portrait Widescreen)\", \"16:9 (Widescreen)\", \"21:9 (Ultrawide)\"], \"tooltip\": \"The aspect ratio for the output dimensions.\", \"multiselect\": false}]",
+      "fieldValue": "16:9 (Widescreen)",
+      "description": "输出画幅：下拉框类参数需把选项定义一并写入 fieldData，fieldValue 取 options 中一项"
+    },
+    {
+      "nodeId": "115",
+      "fieldName": "megapixels",
+      "fieldValue": "1",
+      "description": "超分倍率"
+    },
+    {
+      "nodeId": "249",
+      "fieldName": "audio",
+      "fieldValue": "6135ce6d9cf7e62ba07612d65a5da687c155923b5cb16117833c45febad8f224.mp3",
+      "description": "音频输入 B（与节点 250 传入同一音频）"
+    }
+  ],
+  "instanceType": "default",
+  "usePersonalQueue": "false"
+}

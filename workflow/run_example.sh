@@ -18,6 +18,7 @@ declare -A APP_IDS=(
   ["img2img_kera2edit.json"]="2088926295186034689"
   ["img2video_minimax_h3.json"]="2088844222551121921"
   ["text2music_minimax.json"]="2094807049065558018"
+  ["imgaudio2video_multishot.json"]="2100129733211148290"
 )
 
 base=$(basename "$WF")

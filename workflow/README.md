@@ -56,6 +56,7 @@ curl -s -X POST "https://www.runninghub.cn/openapi/v2/media/upload/binary" \
 | `img2img_kera2edit.json` | 图生图：参考图+提示词改图（局部重绘/风格迁移） | node 160 `text`、node 104 `image` | 60-170s | 14-34 币 |
 | `img2video_minimax_h3.json` | 图生视频（AnimateDiff + MiniMax H3，支持对话/口播） | node 138 `value`（提示词）、node 137 `image` | 约 5 分钟 | 58-60 币 |
 | `text2music_minimax.json` | AI 音乐生成（三节点新格式：55 歌词 / 49 cfg / 56 曲风） | node 55/49/56 | 3-7 分钟 | 数十币 |
+| `imgaudio2video_multishot.json` | 图+音频→多镜头对白短剧（双角色锚点，15s/3镜头示例） | node 232 `value`（提示词）、150/253 `image`（角色锚点）、250/249 `audio`、132 `value`（时长秒）、115 `aspect_ratio`/`megapixels` | 视时长而定 | — |
 
 ## 一键运行
 
@@ -68,7 +69,14 @@ bash workflow/run_example.sh workflow/img2video_minimax_h3.json
 
 - 图生视频使用 **6 段式 Full-Reference** 提示词（subject_definitions / summary / retention_analysis / detailed_description / overall_soundscape / non_diegetic_music），完整规则与模板见 [docs/提示词模板_FullReference.md](../docs/提示词模板_FullReference.md)
 - ⚠️ MiniMax H3 图生视频工作流的音频节点未连接，提示词中**不要出现 `<Audio 1>` 引用**，否则报错 `prompt media tag validation failed: <Audio 1> is not connected`；需要配音时后期用 edge-tts + ffmpeg 叠加
+- `imgaudio2video_multishot.json` 对应的工作流音频节点**已连接**（250/249）：配音/歌声通过节点直接传入，提示词中无需引用 `<Audio N>`；时长节点（132）的秒数要与提示词内 `[Shot N]（xs-ys）` 时间轴一致
 - `fieldValue` 中的换行在 JSON 里写作 `\n`
+
+## 特殊参数写法（以 imgaudio2video_multishot 为例）
+
+- **同节点多个参数**：同一 `nodeId` 可出现多次，靠 `fieldName` 区分。如 node 115 同时提交 `aspect_ratio`（画幅）和 `megapixels`（超分倍率）两条记录
+- **下拉框（COMBO）参数**：需把选项定义整体写入 `fieldData`（JSON 字符串，含 default/options/tooltip），`fieldValue` 取 `options` 中的原文，如 `"16:9 (Widescreen)"`
+- **多角色锚点**：提示词 `subject_definitions` 中声明 `<Picture 1>/<Picture 2>` 各自负责的角色与造型，对应 image 节点传入参考图；`retention_analysis` 逐锚点声明保留项，防止长视频角色漂移
 
 ## 常见错误
 
