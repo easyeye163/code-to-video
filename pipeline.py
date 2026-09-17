@@ -1369,6 +1369,188 @@ def _sp_run_concat(ffmpeg, listf, out, cwd_dir):
 
 
 
+# ============ shotlist：分镜结构化编辑层（智能体接口，零消耗） ============
+# 定位：智能体/自动化脚本对 storyboards/epN.json 的"读-验-改"工具层。
+#   show     导出结构化分镜（含每段内容指纹，用于检测哪段变了需要重生成）
+#   validate 严格校验（比 check 多：镜头时间轴连续闭合、seg 编号连续、时长对齐）
+#   set      原子化字段编辑（写前全量校验，带病修改不落盘；--dry-run 预检）
+# 全部子命令输出 JSON 到 stdout，退出码 0=成功 / 1=校验失败或错误。
+# 本层永不提交任务、不消耗币；提交走 payload/submit/batch。
+
+SEG_FIELDS = {"summary", "soundscape", "music", "duration", "p1", "p2", "scene",
+              "voice", "style_retention", "drift_clause", "scene_retention",
+              "voice_audio", "dialogue_style"}
+SHOT_FIELDS = {"time", "desc", "dialogue"}
+
+
+def _parse_time(t):
+    """'0s-7s' → (0.0, 7.0)；解析失败返回 None"""
+    m = re.match(r"^(\d+(?:\.\d+)?)\s*s\s*-\s*(\d+(?:\.\d+)?)\s*s$", str(t).strip())
+    return (float(m.group(1)), float(m.group(2))) if m else None
+
+
+def _seg_fingerprint(seg: dict):
+    """段内容指纹：内容没变=指纹不变=可跳过重生成（智能体据此决定是否重新提交）"""
+    payload = json.dumps(seg, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()[:16]
+
+
+def _coerce_field(field: str, value: str):
+    if field == "duration":
+        try:
+            return int(value)
+        except ValueError:
+            die(f"duration 必须是整数秒，实际 {value!r}")
+    if field == "voice_audio":
+        if value not in ("true", "false"):
+            die(f"voice_audio 必须是 true/false，实际 {value!r}")
+        return value == "true"
+    return value
+
+
+def _validate_storyboard(project: Project, sb: dict, ep: int):
+    """严格校验整集分镜，返回 (problems, warnings)"""
+    problems, warnings = [], []
+    segs = sb.get("segments", [])
+    if not segs:
+        problems.append("segments 为空")
+        return problems, warnings
+    seen, prev_no = set(), 0
+    for seg in segs:
+        no = seg.get("seg")
+        tag = f"ep{ep} seg{no}"
+        if not isinstance(no, int):
+            problems.append(f"{tag}: seg 编号必须是整数，实际 {no!r}")
+            continue
+        if no in seen:
+            problems.append(f"{tag}: seg 编号重复")
+        seen.add(no)
+        if no != prev_no + 1:
+            problems.append(f"{tag}: seg 编号不连续（期望 {prev_no + 1}）")
+        prev_no = no
+
+        try:
+            project.char(seg.get("p1"), tag)
+            if "p2" in seg:
+                project.char(seg["p2"], tag)
+            project.scene(seg.get("scene"), tag)
+            v = project.char(seg.get("voice", seg.get("p1")), tag)
+            if not v.get("voice"):
+                problems.append(f"{tag}: 角色 {v['name']} 无音色文件")
+        except ValueError as e:
+            problems.append(f"{tag}: {e}")
+
+        for f in ("summary", "soundscape", "music", "duration"):
+            if not seg.get(f):
+                problems.append(f"{tag}: 缺少必填字段 {f}")
+        if not seg.get("shots"):
+            problems.append(f"{tag}: shots 为空")
+            continue
+
+        # 镜头时间轴：格式合法、连续、递增、末尾=段时长（节点132与提示词时间轴一致）
+        dur = float(seg.get("duration", 0))
+        cursor = 0.0
+        for i, shot in enumerate(seg.get("shots", []), 1):
+            span = _parse_time(shot.get("time"))
+            if span is None:
+                problems.append(f"{tag} shot{i}: time 格式应为 '0s-7s'，实际 {shot.get('time')!r}")
+                continue
+            a, b = span
+            if abs(a - cursor) > 0.01:
+                problems.append(f"{tag} shot{i}: 时间轴不连续（起点 {a:g}s，应为 {cursor:g}s）")
+            if b <= a:
+                problems.append(f"{tag} shot{i}: 时段结束 {b:g}s ≤ 起点 {a:g}s")
+            cursor = max(cursor, b)
+        if dur > 0 and abs(cursor - dur) > 0.01:
+            problems.append(f"{tag}: 镜头时间轴末尾 {cursor:g}s ≠ 段时长 {dur:g}s"
+                            f"（时长节点与提示词 [Shot N] 时间轴必须一致）")
+
+        try:
+            render_prompt(project, seg)  # 渲染演练：暴露模板/字段缺失
+        except ValueError as e:
+            problems.append(f"{tag}: {e}")
+        _check_dialogue_budget(warnings, seg, tag)
+    return problems, warnings
+
+
+def cmd_shotlist_show(project_dir: Path, ep: int, seg_no=None, with_prompt=False):
+    project = Project(project_dir)
+    sb = project.storyboard(ep)
+    segs = [s for s in sb.get("segments", []) if seg_no is None or s.get("seg") == seg_no]
+    if seg_no is not None and not segs:
+        die(f"ep{ep} 不存在 seg{seg_no}")
+    out = {"project": sb.get("project"), "ep": ep, "title": sb.get("title"),
+           "segments": [dict(s, fingerprint=_seg_fingerprint(s)) for s in segs]}
+    if with_prompt:
+        for item, src in zip(out["segments"], segs):
+            try:
+                item["prompt"], *_ = render_prompt(project, src)
+            except ValueError as e:
+                item["prompt_error"] = str(e)
+    print(json.dumps(out, ensure_ascii=False, indent=2))
+
+
+def cmd_shotlist_validate(project_dir: Path, ep: int):
+    project = Project(project_dir)
+    sb = project.storyboard(ep)
+    problems, warnings = _validate_storyboard(project, sb, ep)
+    print(json.dumps({"ok": not problems, "ep": ep,
+                      "segments": len(sb.get("segments", [])),
+                      "problems": problems, "warnings": warnings},
+                     ensure_ascii=False, indent=2))
+    if problems:
+        raise SystemExit(1)
+
+
+def cmd_shotlist_set(project_dir: Path, ep: int, seg_no: int, field: str, value: str,
+                     shot_no=None, dry_run=False):
+    if field not in SEG_FIELDS and field not in SHOT_FIELDS:
+        die(f"不支持的字段 {field!r}（段级：{', '.join(sorted(SEG_FIELDS))}；"
+            f"镜头级：{', '.join(sorted(SHOT_FIELDS))}）")
+    if shot_no is not None and field not in SHOT_FIELDS:
+        die(f"字段 {field} 是段级字段，不能与 --shot 同用")
+    if shot_no is None and field in SHOT_FIELDS:
+        die(f"字段 {field} 是镜头级字段，必须指定 --shot N")
+
+    project = Project(project_dir)
+    sb_path = project_dir / "storyboards" / f"ep{ep}.json"
+    sb = project.storyboard(ep)
+    target = next((s for s in sb.get("segments", []) if s.get("seg") == seg_no), None)
+    if target is None:
+        die(f"ep{ep} 不存在 seg{seg_no}")
+
+    if shot_no is not None:
+        shots = target.get("shots", [])
+        if not (1 <= shot_no <= len(shots)):
+            die(f"seg{seg_no} 无 shot{shot_no}（共 {len(shots)} 个镜头）")
+        old = shots[shot_no - 1].get(field)
+        if value == "" and field == "dialogue":
+            shots[shot_no - 1].pop("dialogue", None)  # 清空台词=删键（format_shots 自动省略）
+        else:
+            shots[shot_no - 1][field] = _coerce_field(field, value)
+    else:
+        old = target.get(field)
+        target[field] = _coerce_field(field, value)
+
+    # 写前全量校验：带病的修改不落盘
+    problems, warnings = _validate_storyboard(project, sb, ep)
+    result = {"ok": not problems, "ep": ep, "seg": seg_no, "shot": shot_no,
+              "field": field, "old": old, "new": value,
+              "fingerprint": _seg_fingerprint(target),
+              "problems": problems, "warnings": warnings}
+    if problems:
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+        raise SystemExit(1)
+    if dry_run:
+        result["dry_run"] = True
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+        return
+    tmp = sb_path.with_suffix(".json.tmp")
+    tmp.write_text(json.dumps(sb, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    tmp.replace(sb_path)  # 原子替换，避免智能体并发读到大文件写一半的状态
+    print(json.dumps(result, ensure_ascii=False, indent=2))
+
+
 def main():
     ap = argparse.ArgumentParser(
         description="code-to-video 制作流水线：分镜 + 项目配置 + 提示词模板 → RunningHub payload")
@@ -1437,6 +1619,27 @@ def main():
     p.add_argument("project", help="项目目录")
     p.add_argument("--ep", type=int, help="只备份指定集（缺省备份全部已生成集）")
 
+    p = sub.add_parser("shotlist", help="分镜结构化编辑层（智能体接口，零消耗）：show/validate/set，全部 JSON 输出")
+    s = p.add_subparsers(dest="shotlist_cmd", required=True)
+    sp = s.add_parser("show", help="导出结构化分镜（含每段内容指纹；--prompt 附渲染后的完整提示词）")
+    sp.add_argument("project", help="项目目录")
+    sp.add_argument("--ep", type=int, required=True, help="集数")
+    sp.add_argument("--seg", type=int, help="只导出指定段")
+    sp.add_argument("--prompt", action="store_true", help="附每段渲染后的 6 段式提示词")
+    sp = s.add_parser("validate", help="严格校验（时间轴连续闭合/编号连续/时长对齐/台词预算），JSON 报告")
+    sp.add_argument("project", help="项目目录")
+    sp.add_argument("--ep", type=int, required=True, help="集数")
+    sp = s.add_parser("set", help="原子化字段编辑：写前全量校验，带病修改不落盘（先 --dry-run 预检）")
+    sp.add_argument("project", help="项目目录")
+    sp.add_argument("--ep", type=int, required=True, help="集数")
+    sp.add_argument("--seg", type=int, required=True, help="段号")
+    sp.add_argument("--shot", type=int, help="镜头号（改镜头级字段时必填；缺省改段级字段）")
+    sp.add_argument("--field", required=True,
+                   help="段级：%s；镜头级：%s" % ("|".join(sorted(SEG_FIELDS)), "|".join(sorted(SHOT_FIELDS))))
+    sp.add_argument("--value", required=True,
+                   help="新值（dialogue 传空串=清除台词；含 - 开头时用 --value=xxx 形式）")
+    sp.add_argument("--dry-run", action="store_true", help="只校验并预览结果，不写盘")
+
     args = ap.parse_args()
     project_dir = Path(args.project)
     if args.cmd != "init-project" and not project_dir.exists():
@@ -1464,6 +1667,14 @@ def main():
         cmd_verify(project_dir, args.ep, args.seg, args.threshold)
     elif args.cmd == "backup":
         cmd_backup(project_dir, args.ep)
+    elif args.cmd == "shotlist":
+        if args.shotlist_cmd == "show":
+            cmd_shotlist_show(project_dir, args.ep, args.seg, args.prompt)
+        elif args.shotlist_cmd == "validate":
+            cmd_shotlist_validate(project_dir, args.ep)
+        elif args.shotlist_cmd == "set":
+            cmd_shotlist_set(project_dir, args.ep, args.seg, args.field,
+                             args.value, args.shot, args.dry_run)
 
 
 if __name__ == "__main__":

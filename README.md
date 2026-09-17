@@ -8,7 +8,7 @@
 
 | 路径 | 功能 | 约束 / 说明 |
 |---|---|---|
-| `pipeline.py` | **制作流水线入口** | check / payload / submit / batch / render / verify / init-project / asset / backup 九大命令 |
+| `pipeline.py` | **制作流水线入口** | check / payload / submit / batch / render / verify / init-project / asset / backup / shotlist 十大命令；`shotlist` 为智能体结构化编辑层（详见 [docs/shotlist_智能体接口.md](docs/shotlist_智能体接口.md)） |
 | `workflow/` | **RunningHub API 调用 JSON 案例** | 文生图/图生图/图生视频/音乐四类请求体 + 一键脚本，密钥一律环境变量 |
 | `projects/` | **项目抽象层** | 每个短剧项目一份自包含配置；`example/` 为可跑通的模板骨架 |
 | `scripts/` | Python / Shell 脚本 | 对话音频、音乐生成、Seedance、MinIO 同步、飞书同步等 |
@@ -57,6 +57,8 @@ python pipeline.py render  projects/ancient_town_x --ep 1 --title "第1集" [--b
 python pipeline.py verify  projects/ancient_town_x --ep 1     # 台词保真验收：ASR 回读 vs 剧本逐字比对
 python pipeline.py asset   projects/ancient_town_x --character heroine [--three-view --ref-url URL]  # 素材自动生成入 MinIO
 python pipeline.py backup  projects/ancient_town_x --ep 1     # 出海素材包：无字幕段+SRT+无字幕成片 → MinIO
+python pipeline.py shotlist show projects/ancient_town_x --ep 1 --prompt  # 智能体：读分镜+指纹+渲染预览（零消耗）
+python pipeline.py shotlist set  projects/ancient_town_x --ep 1 --seg 2 --shot 1 --field dialogue --value "新台词。"  # 智能体：改单个镜头字段（写前校验，带病不落盘）
 ```
 
 ### 4) 媒体资源上 MinIO（不入库原则）
