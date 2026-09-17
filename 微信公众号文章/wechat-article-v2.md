@@ -296,7 +296,7 @@ lark-cli base +record-upsert \
 
 # 更新作品表（新增生成结果）
 lark-cli base +record-batch-create \
-  --table-id tbl9hKFVTAGrCzlA \
+  --table-id <你的数据表ID> \
   --json '{"create_records":[...]}'
 
 # 更新进度表（标记任务状态）
@@ -332,7 +332,7 @@ lark-cli base +record-upsert \
 | 分镜表V2 | 3条 | ✅ 完整提示词 |
 | 制作进度 | 6条 | ✅ 状态追踪 |
 
-**访问链接**：https://my.feishu.cn/base/MsfRbVPZ4aicuRsotmwcwgb9npc
+**访问链接**：https://your-domain.feishu.cn/base/<你的base_token>
 
 ### 4.3 资源引用关系
 
@@ -576,7 +576,7 @@ curl -X POST 'https://www.runninghub.cn/openapi/v2/run/ai-app/208892059235027763
 ### 更新飞书表格
 ```bash
 lark-cli base +record-upsert \
-  --base-token MsfRbVPZ4aicuRsotmwcwgb9npc \
+  --base-token <你的base_token> \
   --table-id tblaHvrCcTMIPP7i \
   --record-id recvsEQ0HIWS1K \
   --json '{"角色提示词":"...","关联作品":[{"id":"recvsF3fjinSlx"}]}'

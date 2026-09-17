@@ -238,7 +238,7 @@ while True:
 
 # 自动更新飞书多维表格
 update_feishu_base(
-    table_id="tbl9hKFVTAGrCzlA",
+    table_id="<你的数据表ID>",
     record={
         "任务名称": "海边沙滩-视频生成",
         "远程链接": video_url,
