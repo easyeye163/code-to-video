@@ -68,3 +68,6 @@ projects/*/output/
 .env
 *.token
 *token*.tmp
+
+# MinIO 资源清单由 minio_sync.py scan 生成，不入库
+resources/minio-manifest.json

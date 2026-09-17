@@ -1,0 +1,12 @@
+{
+  "nodeInfoList": [
+    {
+      "nodeId": "17",
+      "fieldName": "prompt",
+      "fieldValue": "青山脚下的小镇黄昏，石板老街暖色灯光次第亮起，一位旅人背着行囊远去的背影，电影感构图，柔和暖光，轻度胶片颗粒",
+      "description": "图片描述提示词（中文即可）"
+    }
+  ],
+  "instanceType": "default",
+  "usePersonalQueue": "false"
+}

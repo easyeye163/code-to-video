@@ -1,0 +1,18 @@
+{
+  "nodeInfoList": [
+    {
+      "nodeId": "160",
+      "fieldName": "text",
+      "fieldValue": "将角色的外套改为深蓝色风衣，保持面部、发型与背景不变，写实风格",
+      "description": "修改提示词（基于参考图局部重绘/风格迁移）"
+    },
+    {
+      "nodeId": "104",
+      "fieldName": "image",
+      "fieldValue": "openapi/xxxxxxxxxxxxxxxxxxxxxxxx.png",
+      "description": "参考图：上传接口返回的 fileName，或可直接访问的完整 URL"
+    }
+  ],
+  "instanceType": "default",
+  "usePersonalQueue": "false"
+}

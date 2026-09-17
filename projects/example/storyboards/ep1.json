@@ -1,0 +1,53 @@
+{
+  "project": "example",
+  "episode": 1,
+  "title": "雨夜投宿",
+  "segments": [
+    {
+      "seg": 1,
+      "p1": "traveler",
+      "scene": "old_street",
+      "voice": "traveler",
+      "duration": 15,
+      "summary": "雨夜中的老街（场景参照<Picture 2>老街），跟拍旅人撑伞走入画面，檐下灯笼次第亮起，他抬眼望见客栈灯火。",
+      "shots": [
+        {
+          "time": "0s-7s",
+          "desc": "中景跟拍，<Picture 1> 参照的 <Subject 1>（S1）旅人撑伞走上青石板老街，雨水在灯光下拉出细线",
+          "dialogue": "走了整整三天，鞋底都磨穿了。还好，前面有灯火，有人家就有热饭。"
+        },
+        {
+          "time": "7s-15s",
+          "desc": "镜头越过他推向街尾，客栈灯笼在雨雾中晕开暖光。",
+          "dialogue": "赶了这么久的路，今晚总算能睡个安稳觉了。"
+        }
+      ],
+      "soundscape": "雨打屋檐与远处闷雷",
+      "music": "低音古筝点缀，克制而悬疑"
+    },
+    {
+      "seg": 2,
+      "p1": "traveler",
+      "p2": "innkeeper",
+      "scene": "inn_hall",
+      "scene_retention": "柜台位置、壁炉火光与窗外雨夜保持稳定",
+      "voice": "innkeeper",
+      "duration": 15,
+      "summary": "客栈大堂内掌柜递出铜钥匙，一问一答间安定下来，暖光收束。",
+      "shots": [
+        {
+          "time": "0s-7s",
+          "desc": "中景，<Picture 2> 参照的 <Subject 2>（S2）掌柜把铜钥匙推过柜台，",
+          "dialogue": "二楼尽头那间，热水刚烧好，让小二送一桶去泡脚解解乏。"
+        },
+        {
+          "time": "7s-15s",
+          "desc": "近景，<Subject 1>（S1）接过钥匙颔首致谢，壁炉火光映在两人之间。",
+          "dialogue": "多谢掌柜。这鬼天气，可算有个落脚的地方了。"
+        }
+      ],
+      "soundscape": "壁炉柴火噼啪与窗外雨声",
+      "music": "温暖的弦乐收束"
+    }
+  ]
+}

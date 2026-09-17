@@ -1,18 +1,18 @@
 #!/bin/bash
 
-# 永泰嵩口古镇 - 人物三视图同步脚本
+# AI 短剧项目 - 人物三视图同步脚本
 # 将RunningHub生成的写实风格三视图同步到飞书作品列表并下载到本地
 
 set -e
 
-echo "🎬 永泰嵩口古镇 - 人物定妆照同步工具"
+echo "🎬 AI 短剧项目 - 人物定妆照同步工具"
 echo "================================"
 echo ""
 
 # 配置
-BASE_TOKEN="MsfRbVPZ4aicuRsotmwcwgb9npc"
-TABLE_ID="tbl9hKFVTAGrCzlA"
-LOCAL_DIR="./images/songkou_characters"
+BASE_TOKEN="${FEISHU_BASE_TOKEN:?请 export FEISHU_BASE_TOKEN=你的多维表格app_token}"
+TABLE_ID="${FEISHU_TABLE_ID:?请 export FEISHU_TABLE_ID=你的数据表ID}"
+LOCAL_DIR="./images/characters"
 
 # 创建本地目录
 mkdir -p "$LOCAL_DIR"
@@ -129,7 +129,7 @@ for i in "${!CHARACTERS[@]}"; do
   fi
   
   records_json+="{\"fields\":{"
-  records_json+="\"任务名称\":\"嵩口_${name}_写实三视图定妆照\","
+  records_json+="\"任务名称\":\"${name}_写实三视图定妆照\","
   records_json+="\"任务类型\":[\"文生图\"],"
   records_json+="\"任务状态\":[\"已完成\"],"
   records_json+="\"提示词\":\"Professional three-view portrait photography, ${desc}, photorealistic, 8K ultra HD, cinematic lighting\","
@@ -144,14 +144,14 @@ for i in "${!CHARACTERS[@]}"; do
 done
 records_json+="]}"
 
-echo "$records_json" | jq '.' > /tmp/songkou_records.json
-echo "✅ JSON已生成: /tmp/songkou_records.json"
+echo "$records_json" | jq '.' > /tmp/character_records.json
+echo "✅ JSON已生成: /tmp/character_records.json"
 
 # 执行创建
 create_result=$(lark-cli base +record-batch-create \
   --base-token "$BASE_TOKEN" \
   --table-id "$TABLE_ID" \
-  --json "$(cat /tmp/songkou_records.json)" \
+  --json "$(cat /tmp/character_records.json)" \
   --as user 2>&1)
 
 if echo "$create_result" | jq -e '.ok' > /dev/null 2>&1; then

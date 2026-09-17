@@ -1,0 +1,61 @@
+{
+  "name": "example",
+  "title": "示例项目：N 集 AI 短剧模板",
+  "style_qualifier": "电影感短剧",
+  "engine": {
+    "provider": "runninghub",
+    "app_id": "REPLACE_WITH_YOUR_AI_APP_ID",
+    "instance_type": "default",
+    "defaults": {
+      "duration": 15,
+      "aspect_ratio": "16:9 (Widescreen)",
+      "megapixels": "0.7000000000000001",
+      "use_personal_queue": "false",
+      "aspect_ratio_fielddata": "[\"COMBO\", {\"default\": \"1:1 (Square)\", \"options\": [\"1:1 (Square)\", \"2:3 (Portrait Photo)\", \"3:2 (Photo)\", \"3:4 (Portrait Standard)\", \"4:3 (Standard)\", \"9:16 (Portrait Widescreen)\", \"16:9 (Widescreen)\", \"21:9 (Ultrawide)\"], \"tooltip\": \"The aspect ratio for the output dimensions.\", \"multiselect\": false}]"
+    }
+  },
+  "style": {
+    "visual": "目标视频采用电影感叙事风格，柔和暖光，空气感微尘，轻度去饱和 SLOG 质感。",
+    "retention": "电影质感叙事风格，柔和暖光，轻度去饱和 SLOG 色调"
+  },
+  "prompt_templates": {
+    "single": "prompt_template_single.txt",
+    "dual": "prompt_template_dual.txt"
+  },
+  "characters": {
+    "traveler": {
+      "name": "旅人",
+      "gender": "男性",
+      "ref_image": "images/characters/traveler_three_view.png",
+      "voice": "audio/voices/traveler.flac",
+      "identity": "旅人，28 岁，深蓝粗布外袍，皮质行囊，眉目沉静，风尘仆仆",
+      "retention": "旅人的面部、发型、外袍、行囊全程一致",
+      "voice_desc": "沉稳温和的青年男声"
+    },
+    "innkeeper": {
+      "name": "掌柜",
+      "gender": "男性",
+      "ref_image": "images/characters/innkeeper_three_view.png",
+      "voice": "audio/voices/innkeeper.flac",
+      "identity": "掌柜，60 岁，银白头发，素色围裙，面容和善，体态微胖",
+      "retention": "掌柜的面部、银发、围裙全程一致",
+      "voice_desc": "苍老和煦的男声"
+    }
+  },
+  "scenes": {
+    "old_street": {
+      "name": "老街",
+      "ref_image": "images/scenes/old_street.png",
+      "desc": "青石板老街，两侧木构店铺，檐下挂灯笼，街尾有石桥",
+      "anchor": "街道纵深、灯笼位置与石桥轮廓",
+      "retention": "老街的建筑立面、街道走向保持稳定"
+    },
+    "inn_hall": {
+      "name": "客栈大堂",
+      "ref_image": "images/scenes/inn_hall.png",
+      "desc": "木质客栈大堂，柜台与铜钥匙架，角落壁炉，窗外雨夜",
+      "anchor": "柜台位置与壁炉形态",
+      "retention": "大堂的柜台、壁炉、窗位保持稳定"
+    }
+  }
+}

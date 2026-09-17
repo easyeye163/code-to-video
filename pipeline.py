@@ -14,11 +14,11 @@ code-to-video 制作流水线
   output/                生成的 payload（已 gitignore，不入库）
 
 用法：
-  python pipeline.py check   projects/songkou                  # 校验项目与分镜
-  python pipeline.py payload projects/songkou --ep 7           # 生成整集 payload
-  python pipeline.py payload projects/songkou --ep 7 --seg 1 --stdout
-  python pipeline.py submit  projects/songkou --ep 7 --seg 1 [--wait]   # 提交（消耗币）
-  python pipeline.py batch   projects/songkou --ep 7 [--continue-on-error]  # 串行批量（自动排队+下载）
+  python pipeline.py check   projects/example                  # 校验项目与分镜
+  python pipeline.py payload projects/example --ep 1           # 生成整集 payload
+  python pipeline.py payload projects/example --ep 1 --seg 1 --stdout
+  python pipeline.py submit  projects/example --ep 1 --seg 1 [--wait]   # 提交（消耗币）
+  python pipeline.py batch   projects/example --ep 1 [--continue-on-error]  # 串行批量（自动排队+下载）
 
 单并发适配（batch）：
   - 同一时刻至多一个在途任务，421 占用自动等待重试
@@ -68,9 +68,16 @@ class Assets:
 
     def __init__(self):
         if not MANIFEST_PATH.exists():
-            die("缺少 resources/minio-manifest.json，请先运行 scripts/minio_sync.py scan")
+            # 未配置 MinIO 时允许继续：check 仍可校验配置与分镜一致性，
+            # 仅在真正解析资产 URL 时才会逐项报错
+            print("⚠ 未找到 resources/minio-manifest.json（先运行 scripts/minio_sync.py scan 生成）；"
+                  "资产 URL 解析不可用，check 仅做结构校验", file=sys.stderr)
+            self.urls = {}
+            self.available = False
+            return
         m = json.load(open(MANIFEST_PATH, encoding="utf-8"))
         self.urls = {e["path"]: e.get("url") for e in m.get("resources", [])}
+        self.available = True
 
     def url_of(self, path):
         if not path:
@@ -200,14 +207,14 @@ def build_payload(project: Project, seg: dict, ep: int):
 
     if p2 is not None:  # 双角色模式：节点分配由 engine.dual_layout 决定
         if project.cfg["engine"].get("dual_layout") == "scene_at_166":
-            # 镇妖录式：Picture 2=场景（node 166），Picture 3=第二角色（node 167）
+            # 布局 scene_at_166：Picture 2=场景（node 166），Picture 3=第二角色（node 167）
             node166 = {"nodeId": "166", "fieldName": "image", "fieldValue": scene_url,
                        "description": f"picture2（{scene['name']}场景图）"}
             node167 = {"nodeId": "167", "fieldName": "image",
                        "fieldValue": project.assets.url_of(p2["ref_image"]),
                        "description": f"picture3（{p2['name']}角色图）"}
         else:
-            # 嵩口式（默认）：Picture 2=第二角色（node 166），Picture 3=场景（node 167）
+            # 默认布局：Picture 2=第二角色（node 166），Picture 3=场景（node 167）
             node166 = {"nodeId": "166", "fieldName": "image",
                        "fieldValue": project.assets.url_of(p2["ref_image"]),
                        "description": f"picture2（{p2['name']}角色图）"}
@@ -288,16 +295,23 @@ def cmd_check(project_dir: Path):
     problems = []
     warnings = []
 
+    def asset_issue(kind, name, e):
+        """资产解析失败：已配置清单判为问题；未配置 MinIO 降级为提醒（不阻断结构校验）"""
+        if project.assets.available:
+            problems.append(f"[{kind} {name}] {e}")
+        else:
+            warnings.append(f"[{kind} {name}] {e}")
+
     for key, c in project.characters.items():
         try:
             project.assets.url_of(c.get("ref_image"))
         except ValueError as e:
-            problems.append(f"[角色 {c['name']}] ref_image: {e}")
+            asset_issue("角色", c['name'], f"ref_image: {e}")
         if c.get("voice"):
             try:
                 project.assets.url_of(c["voice"])
             except ValueError as e:
-                problems.append(f"[角色 {c['name']}] voice: {e}")
+                asset_issue("角色", c['name'], f"voice: {e}")
         elif not c.get("voice_optional"):
             problems.append(f"[角色 {c['name']}] voice: 未配置（无专属音色文件，引用该角色的分镜无法生成；"
                             f"无对白角色可在 project.json 中设 \"voice_optional\": true 豁免）")
@@ -309,7 +323,7 @@ def cmd_check(project_dir: Path):
         try:
             project.assets.url_of(s.get("ref_image"))
         except ValueError as e:
-            problems.append(f"[场景 {s['name']}] ref_image: {e}")
+            asset_issue("场景", s['name'], f"ref_image: {e}")
 
     sb_dir = project_dir / "storyboards"
     sbs = sorted(sb_dir.glob("ep*.json")) if sb_dir.exists() else []
@@ -723,7 +737,7 @@ def find_clip(project: Project, ep: int, seg: int, clips_dir=None):
     candidates.append(project.dir / "output" / f"ep{ep}_seg{seg}.mp4")
     src_root = project.cfg.get("source_root")
     if src_root:
-        for base in ("videos/songkou_drama", "videos"):
+        for base in ("videos/output", "videos"):
             candidates.extend(sorted((Path(src_root) / base).glob(f"EP{ep}段{seg}_*.mp4")))
     for c in candidates:
         if c.exists():
@@ -986,7 +1000,7 @@ def cmd_init_project(project_dir: Path, title=None, layout=None, instance="plus"
     cfg["title"] = title or name
     cfg["engine"]["instance_type"] = instance
     cfg["engine"]["defaults"]["aspect_ratio_fielddata"] = json.load(open(
-        ROOT / "projects" / "songkou" / "project.json", encoding="utf-8")
+        ROOT / "projects" / "example" / "project.json", encoding="utf-8")
     )["engine"]["defaults"]["aspect_ratio_fielddata"]
     if layout:
         cfg["engine"]["dual_layout"] = layout
@@ -999,7 +1013,7 @@ def cmd_init_project(project_dir: Path, title=None, layout=None, instance="plus"
     (project_dir / "project.json").write_text(
         json.dumps(cfg, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     for t in ("prompt_template_single.txt", "prompt_template_dual.txt"):
-        shutil.copy2(ROOT / "projects" / "songkou" / t, project_dir / t)
+        shutil.copy2(ROOT / "projects" / "example" / t, project_dir / t)
     sb_dir = project_dir / "storyboards"
     sb_dir.mkdir(exist_ok=True)
     (sb_dir / "README.md").write_text(
@@ -1116,9 +1130,9 @@ def cmd_asset(project_dir: Path, character=None, scene=None, three_view=False,
             app, node, extra = KREA, "160", [
                 {"nodeId": "104", "fieldName": "image", "fieldValue": ref_url}]
         else:
-            xianxia = project.cfg["name"] == "yaolu"
+            render_style = project.cfg.get("asset_style", "realistic")
             prompt = (f"{c['identity']}，全身角色立绘，正面站姿，纯白简洁背景，"
-                      f"{'3D CG渲染，国漫角色设定集风格' if xianxia else '超写实照片级质感'}，高清细节，8K")
+                      f"{'3D CG渲染，国漫角色设定集风格' if render_style == '3d' else '超写实照片级质感'}，高清细节，8K")
             app, node, extra = ZIMAGE, "17", None
     elif scene:
         s = project.scene(scene, "asset")
@@ -1175,7 +1189,7 @@ def _norm_cn(s: str):
 
 
 def _py(s: str):
-    """拼音归一：消除 ASR 同音字转写噪音（嵩口/松口、大阵/大镇）。"""
+    """拼音归一：消除 ASR 同音字转写噪音（同音不同字的误转写）。"""
     try:
         from pypinyin import lazy_pinyin
         return " ".join(lazy_pinyin(_norm_cn(s)))
@@ -1361,7 +1375,7 @@ def main():
     sub = ap.add_subparsers(dest="cmd", required=True)
 
     p = sub.add_parser("check", help="校验项目配置与分镜")
-    p.add_argument("project", help="项目目录，如 projects/songkou")
+    p.add_argument("project", help="项目目录，如 projects/example")
 
     p = sub.add_parser("payload", help="生成 payload（不提交、不消耗币）")
     p.add_argument("project", help="项目目录")
@@ -1398,10 +1412,10 @@ def main():
     p = sub.add_parser("init-project", help="创建新剧项目骨架（配置+模板+分镜说明+开工清单）")
     p.add_argument("project", help="新项目目录，如 projects/ancient_town_x")
     p.add_argument("--title", help="剧名（缺省用目录名）")
-    p.add_argument("--layout", choices=["scene_at_166"], help="双角色节点布局（缺省嵩口式）")
+    p.add_argument("--layout", choices=["scene_at_166"], help="双角色节点布局（缺省：角色在 node166）")
     p.add_argument("--instance", default="plus", help="RunningHub 实例类型，默认 plus")
     p.add_argument("--no-voice-audio", dest="voice_audio", action="store_false",
-                   help="提示词默认不写音色参考行（如镇妖录式）")
+                   help="提示词默认不写音色参考行（如 scene_at_166 布局）")
     p.add_argument("--source-root", help="本地资源根目录（render 自动找手工成片 EP{N}段{M}_*.mp4）")
 
     p = sub.add_parser("asset", help="角色/场景图自动生成 → MinIO 入库 → 回写配置")

@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 """
-《古镇之灵》Chinoiserie Downtempo 版 — 三节点新格式
+AI 音乐生成参考实现 — MiniMax 三节点新格式（RunningHub ai-app）
 节点 55: 纯歌词（段落标签 + 括号编曲提示）
 节点 49: cfg 提示词强度
 节点 56: 曲风结构化描述（Global Metadata / Vocal Details / Arrangement 三段式英文）
 instanceType: plus
+
+用法：export RUNNINGHUB_API_KEY=你的key 后运行；歌词/曲风替换为你自己的内容。
 """
 import requests
 import json
@@ -13,11 +15,11 @@ import os
 import sys
 
 # ===== 配置 =====
-API_KEY = os.environ.get("RUNNINGHUB_API_KEY", "8fb0b806946040448ef2e8ef1ea891de")
+API_KEY = os.environ.get("RUNNINGHUB_API_KEY", "")
 APP_ID = "2094807049065558018"  # MiniMax H3 音乐生成
 BASE_URL = "https://www.runninghub.cn/openapi/v2"
-SAVE_PATH = "/home/z/my-project/download/songkou_guzhenzhiling_downtempo.mp3"
-STATE_FILE = "/home/z/my-project/scripts/.music_task_state.json"  # 断点续跑状态
+SAVE_PATH = "output/music_example.mp3"
+STATE_FILE = "output/.music_task_state.json"  # 断点续跑状态
 
 # ===== 节点 56: 曲风结构化描述（三段式英文） =====
 style_prompt = """[Global Metadata]
@@ -40,67 +42,24 @@ Chorus: full downtempo beat, 808 sub-bass, guzheng and erhu counter-melody, laye
 Bridge: beat thins to half-time, guzheng and lead vocal duet, erhu answering phrases
 Outro: drums fade out, 808 low hum with guzheng residue slowly fade to silence"""
 
-# ===== 节点 55: 歌词（保留原词，编曲提示改电子版） =====
+# ===== 节点 55: 歌词（示例：段落标签 + 括号编曲提示，替换为你的歌词） =====
 lyrics = """(Intro 前奏)
-(深沉的808 Bass低频渐入，古筝单音在延迟回声中浮现，溪水采样若隐若现)
+(深沉的808 Bass低频渐入，古筝单音在延迟回声中浮现)
 
 (Verse 1 主歌一)
-大樟溪的水 静静地流过千年
-白墙黛瓦间 谁的梦还未做完
-古榕树下 一盏灯笼摇曳着暖
-风吹鹤形路 石板上落花片片
-
-(Verse 2 主歌二)
-德星楼的檐角 挂着一弯新月
-古码头的碑文 刻着谁的离别
-用坦厝的天井 漏下一束光
-照见阿公沏茶 说起从前的模样
+夜色漫过屋檐 灯火次第亮起
+风从远方带来 旧时光的气息
 
 (Pre-Chorus 导歌)
 (琵琶轮指渐密，合成器铺底缓缓抬升)
 
 (Chorus 副歌)
-古镇的灵 是溪水里的月光
-是夯土墙上 岁月留下的霜
-你听那风 穿过一百八十三间房
-每一扇门后 都藏着一段悠长
-
-古镇的灵 是鹤影掠过的窗
-是青石板上 脚步声的回响
-你走多远 回头她还在原处望
-等着你归来 再尝一碗蛋燕汤
-
-(Instrumental 间奏)
-(二胡独奏如泣如诉，808鼓点收紧，古筝琶音在电音延迟中交织)
-
-(Verse 3 主歌三)
-万安堡的墙 说过多少故事
-宁远庄的月 照过几番别离
-九重粿蒸起 甜甜糯糯的香气
-谁家的姑娘 唱着不知名的曲
-
-(Chorus 副歌)
-古镇的灵 是溪水里的月光
-是夯土墙上 岁月留下的霜
-你听那风 穿过一百八十三间房
-每一扇门后 都藏着一段悠长
-
-(Bridge 桥段)
-(鼓点半抽离，只剩古筝与人声清唱，二胡远远应答)
-松一松肩 倦了就回来看看
-这座古镇 从不催促谁的步慢
-门前的溪水 会替她记着你的归期
-等到那天 推门就是家
-
-(Final Chorus 终极副歌)
-古镇的灵 是溪水里的月光
-是夯土墙上 岁月留下的霜
-你听那风 穿过一百八十三间房
-每一扇门后 都藏着一段悠长
+星夜旅人啊 别怕路途漫长
+心口那盏灯 会照亮回家的方向
 
 (Outro 尾声)
 (鼓点逐渐抽离，只剩808低鸣与古筝余音缓缓淡出)
-古镇的灵… 一直在你身旁…"""
+星夜旅人… 终会回到故乡…"""
 
 # ===== 1. 提交音乐生成任务（三节点格式） =====
 def generate_music(cfg=1.7):
@@ -200,7 +159,7 @@ def download_file(url, save_path):
 
 # ===== 主流程 =====
 if __name__ == "__main__":
-    print("===== 古镇之灵 Chinoiserie Downtempo 版 - AI音乐生成 =====")
+    print("===== AI 音乐生成示例（三节点新格式） =====")
     print("曲风: 国风慢摇电子 (Chinoiserie Downtempo)")
     print("配器: 808 Bass + 古筝 + 二胡 + 琵琶, 92 BPM")
     print("格式: 三节点 (55歌词 / 49cfg / 56曲风) + instanceType plus")

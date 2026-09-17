@@ -1,0 +1,18 @@
+{
+  "nodeInfoList": [
+    {
+      "nodeId": "138",
+      "fieldName": "value",
+      "fieldValue": "subject_definitions:\n<Subject 1> is a young traveler in a worn indigo cloak with a leather satchel, appearing in <Picture 1>, calm and curious expression.\n<Subject 2> is an elderly innkeeper with silver hair and a warm smile, appearing in <Picture 1>, dressed in a plain linen apron.\n\nsummary:\n[reference generation] The target video shows <Subject 1> and <Subject 2> in a lantern-lit inn hall on a rainy night. The traveler steps in from the rain and the innkeeper greets him warmly at the counter.\n\nretention_analysis:\n<Subject 1> (appears in [Shot 1]): fully_preserved - facial features, cloak color and satchel remain consistent.\n<Subject 2> (appears in [Shot 1]): fully_preserved - silver hair, apron and warm smile remain consistent.\n\nsummarized_description:\nThe target video is in a cinematic East-Asian period style with warm lantern light and soft rain glow.\n[Shot 1] Medium shot inside the inn hall. <Subject 1> (S1) shakes rain off his cloak at the doorway and walks to the counter. <Subject 1> (S1) says, <d>[Chinese] 一间房，住一晚。</d> <Subject 2> (S2) slides a brass key across the counter and smiles. <Subject 2> (S2) replies, <d>[Chinese] 二楼尽头，热水刚烧好。</d>\n\noverall_soundscape:\nSteady rain on wooden eaves, distant thunder, crackling fireplace embers.\n\nnon_diegetic_music:\nSoft guzheng and low strings, gentle and nostalgic, fading under the dialogue.",
+      "description": "6段式 Full-Reference 提示词（注意：该工作流音频节点未连接，提示词中不要引用 <Audio 1>）"
+    },
+    {
+      "nodeId": "137",
+      "fieldName": "image",
+      "fieldValue": "openapi/xxxxxxxxxxxxxxxxxxxxxxxx.png",
+      "description": "参考图：上传接口返回的 fileName，或可直接访问的完整 URL"
+    }
+  ],
+  "instanceType": "default",
+  "usePersonalQueue": "false"
+}

@@ -1,0 +1,24 @@
+{
+  "nodeInfoList": [
+    {
+      "nodeId": "55",
+      "fieldName": "text",
+      "fieldValue": "(Intro 前奏)\n(深沉的808 Bass低频渐入，古筝单音在延迟回声中浮现)\n\n(Verse 1 主歌一)\n夜色漫过屋檐 灯火次第亮起\n风从远方带来 旧时光的气息\n\n(Pre-Chorus 导歌)\n(琵琶轮指渐密，合成器铺底缓缓抬升)\n\n(Chorus 副歌)\n星夜旅人啊 别怕路途漫长\n心口那盏灯 会照亮回家的方向\n\n(Outro 尾声)\n(鼓点逐渐抽离，只剩808低鸣与古筝余音缓缓淡出)\n星夜旅人… 终会回到故乡…",
+      "description": "纯歌词：段落标签 + 括号编曲提示"
+    },
+    {
+      "nodeId": "49",
+      "fieldName": "cfg",
+      "fieldValue": "1.7",
+      "description": "提示词强度 cfg"
+    },
+    {
+      "nodeId": "56",
+      "fieldName": "text",
+      "fieldValue": "[Global Metadata]\nGenre: Chinoiserie Downtempo, Chinese electronica ballad\nTempo: 92 BPM, 4/4 time signature\nKey: D minor with pentatonic-leaning melody\nMood: dreamy, nostalgic, serene; night-drift atmosphere\nDynamics: restrained and hypnotic, subtle builds, smooth long transitions\n\n[Vocal Details]\nLead vocal: soft ethereal female voice, Mandarin Chinese\nDelivery: intimate breathy verses, gently soaring chorus, light stacked harmonies in chorus\n\n[Arrangement]\nIntro: deep 808 bass pulse, guzheng plucks drenched in delay\nVerse: sparse 808 groove, soft kick on quarter notes, guzheng arpeggios\nPre-Chorus: pipa tremolo builds, warm pads widen, subtle riser\nChorus: full downtempo beat, 808 sub-bass, guzheng counter-melody\nOutro: drums fade out, low hum with guzheng residue slowly fade to silence",
+      "description": "曲风结构化描述（三段式英文）"
+    }
+  ],
+  "instanceType": "plus",
+  "usePersonalQueue": "false"
+}

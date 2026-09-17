@@ -166,7 +166,7 @@ curl --request POST 'https://www.runninghub.cn/openapi/v2/query' \
 | 江南民谣 | 日常/温情/美食 | Chinese folk ballad, acoustic guitar, bamboo flute, gentle |
 | 电子国风 | 现代+古风融合 | Chinese synth-pop, guzheng samples, trap hats, neon vibe |
 
-> 实测记录：《古镇之灵》民谣版（二节点+default）377s/76 coins；《古镇之灵》慢摇电子版（三节点+plus）191s/110 coins，新格式一次提交成功。
+> 实测记录：《示例曲目》民谣版（二节点+default）377s/76 coins；《示例曲目》慢摇电子版（三节点+plus）191s/110 coins，新格式一次提交成功。
 
 
 ---
@@ -281,7 +281,7 @@ curl --request POST 'https://www.runninghub.cn/openapi/v2/query' \
     ↓
 选 15 秒片段 → 截音 + 对应歌词 → 调用 H3 视频生成
     ↓
-生成音画同步视频 → 下载到 videos/songkou_xianxia/
+生成音画同步视频 → 下载到 videos/<项目名>/
 ```
 
 ---

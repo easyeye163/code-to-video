@@ -49,7 +49,7 @@ curl --location --request POST 'https://www.runninghub.cn/openapi/v2/run/ai-app/
     {
       "nodeId": "137",
       "fieldName": "image",
-      "fieldValue": "https://raw.githubusercontent.com/easyeye163/h3-video-coding/main/images/songkou_characters/lin_xiaoxi_three_view.png",
+      "fieldValue": "https://minio.example.com:9000/code-to-video/images/characters/protagonist_three_view.png",
       "description": "picture1（角色主图）"
     },
     {
@@ -147,11 +147,11 @@ curl --location --request POST 'https://www.runninghub.cn/openapi/v2/query' \
 ## 四、重要注意事项
 
 1. **直接用 GitHub raw 链接**：image/audio 的 fieldValue 填完整的 GitHub raw URL，无需调用上传接口。
-2. **中文路径需 URL 编码**：如 `嵩口全景.png` → `%E5%B5%A9%E5%8F%A3%E5%85%A8%E6%99%AF.png`。
+2. **中文路径需 URL 编码**：如 `古镇全景.png` → `%E5%8F%A4%E9%95%87%E5%85%A8%E6%99%AF.png`。
 3. **未使用节点必须保留**：picture3 / picture4 / audio2 节点不能删。
 4. **图片占位保持 example.png**：picture3 / picture4 未使用时填 `"example.png"`。
 5. **音频占位复用 audio1**：audio2 未使用时直接填 audio1 的链接（避免占位文件导致 errorCode 805）。
-6. **COS 链接 24 小时失效**：生成成功后必须及时下载到本地 `videos/songkou_drama/` 目录。
+6. **COS 链接 24 小时失效**：生成成功后必须及时下载到本地 `videos/output/` 目录。
 7. **并发限制**：同时只能有有限个任务运行，超限返回 `errorCode: 421`。
 8. **提示词换行**：JSON 中换行用 `\n` 转义。
 
@@ -168,5 +168,5 @@ curl --location --request POST 'https://www.runninghub.cn/openapi/v2/query' \
     ↓
 等待约 5-6 分钟，查询结果
     ↓
-下载成片到 videos/songkou_drama/ 目录
+下载成片到 videos/output/ 目录
 ```

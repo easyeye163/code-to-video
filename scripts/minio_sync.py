@@ -26,7 +26,7 @@ MinIO 对象存储中，以 URL 链接形式引用。
    python scripts/minio_sync.py check
 
 5) 查询某个资源的访问链接：
-   python scripts/minio_sync.py url images/songkou_characters/lin_xiaoxi_three_view.png
+   python scripts/minio_sync.py url images/characters/protagonist_three_view.png
 
 配置
 ----
@@ -374,7 +374,7 @@ def main():
     sub.add_parser("check", help="校验桶内对象与清单是否一致")
 
     p = sub.add_parser("url", help="查询某个资源的访问链接")
-    p.add_argument("path", help="资源相对路径，如 images/songkou_characters/xxx.png")
+    p.add_argument("path", help="资源相对路径，如 images/characters/xxx.png")
 
     args = ap.parse_args()
     cfg = load_config()
