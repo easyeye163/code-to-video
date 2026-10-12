@@ -166,6 +166,7 @@ python3 scripts/seedance_video.py generate --first-frame "https://<MinIO>/images
 - [docs/runninghub_video_curl模板.md](docs/runninghub_video_curl模板.md) — 图生视频 curl 模板
 - [docs/runninghub_ai音乐与语音识别工作流.md](docs/runninghub_ai音乐与语音识别工作流.md) — AI 音乐三节点 + ASR 字幕
 - [docs/工作流分析_高级视频生成.md](docs/工作流分析_高级视频生成.md) — 高级视频生成工作流分析
+- [docs/运镜提示词词表.md](docs/运镜提示词词表.md) — 31 种运镜中文→H3 英文对照（嵌入 detailed_description 用）
 
 ## License
 
